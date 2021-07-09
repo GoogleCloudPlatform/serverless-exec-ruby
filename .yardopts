@@ -1,0 +1,10 @@
+--no-private
+--title=AppEngine
+--markup markdown
+--markup-provider redcarpet
+--main=README.md
+./lib/**/*.rb
+-
+README.md
+CONTRIBUTING.md
+CHANGELOG.md
