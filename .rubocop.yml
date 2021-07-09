@@ -3,7 +3,7 @@ inherit_gem:
 
 Metrics/BlockLength:
   Exclude:
-    - "serverlessexec.gemspec"
+    - "serverless.gemspec"
 Metrics/ClassLength:
   Exclude:
     - "lib/google/serverless/exec.rb"
