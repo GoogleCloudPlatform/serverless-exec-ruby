@@ -17,25 +17,25 @@
 
 require "shellwords"
 
-require "appengine/util/gcloud"
-require "appengine/exec"
+require "serverless/util/gcloud"
+require "serverless/exec"
 
 module Google
   module Serverless
     ##
     # # App Engine Rake Tasks.
     #
-    # To make these tasks available, add the line `require "appengine/tasks"`
-    # to your Rakefile. If your app uses Ruby on Rails, then the appengine gem
+    # To make these tasks available, add the line `require "serverless/tasks"`
+    # to your Rakefile. If your app uses Ruby on Rails, then the serverless gem
     # provides a railtie that adds its tasks automatically, so you don't have
     # to do anything beyond adding the gem to your Gemfile.
     #
     # The following tasks are defined:
     #
-    # ## Rake appengine:exec
+    # ## Rake serverless:exec
     #
     # Executes a given command in the context of an App Engine application, using
-    # App Engine remote execution. See {AppEngine::Exec} for more information on
+    # App Engine remote execution. See {Google::Serverless::Exec} for more information on
     # this capability.
     #
     # The command to be run may either be provided as a rake argument, or as
@@ -44,12 +44,12 @@ module Google
     # For example, to run a production database migration, you can run either of
     # the following equivalent commands:
     #
-    #     bundle exec rake "appengine:exec[bundle exec bin/rails db:migrate]"
-    #     bundle exec rake appengine:exec -- bundle exec bin/rails db:migrate
+    #     bundle exec rake "serverless:exec[bundle exec bin/rails db:migrate]"
+    #     bundle exec rake serverless:exec -- bundle exec bin/rails db:migrate
     #
     # To display usage instructions, provide two dashes but no command:
     #
-    #     bundle exec rake appengine:exec --
+    #     bundle exec rake serverless:exec --
     #
     # ### Parameters
     #
@@ -57,7 +57,7 @@ module Google
     # enviroment variable parameters. These are set via the normal mechanism at
     # the end of a rake command line. For example, to set GAE_CONFIG:
     #
-    #     bundle exec rake appengine:exec GAE_CONFIG=myservice.yaml -- bundle exec bin/rails db:migrate
+    #     bundle exec rake serverless:exec GAE_CONFIG=myservice.yaml -- bundle exec bin/rails db:migrate
     #
     # Be sure to set these parameters before the double dash. Any arguments
     # following the double dash are interpreted as part of the command itself.
@@ -66,7 +66,7 @@ module Google
     #
     # #### GAE_TIMEOUT
     #
-    # Amount of time to wait before appengine:exec terminates the command.
+    # Amount of time to wait before serverless:exec terminates the command.
     # Expressed as a string formatted like: "2h15m10s". Default is "10m".
     #
     # #### GAE_PROJECT
@@ -89,7 +89,7 @@ module Google
     #
     # The execution strategy to use. Valid values are "deployment" (which is the
     # default for App Engine Standard apps) and "cloud_build" (which is the
-    # default for App Engine Flexible apps).
+    # default for App Engine Flexible and Cloud Run apps).
     #
     # Normally you should leave the strategy set to the default. The main reason
     # to change it is if your app runs on the Flexible Environment and talks to
@@ -145,7 +145,7 @@ module Google
         #
         def define
           if @defined
-            puts "AppEngine rake tasks already defined."
+            puts "Serverless rake tasks already defined."
             return
           end
           @defined = true
@@ -157,8 +157,8 @@ module Google
   
         def setup_exec_task
           ::Rake.application.last_description =
-            "Execute the given command in Google App Engine."
-          ::Rake::Task.define_task "appengine:exec", [:cmd] do |_t, args|
+            "Execute the given command in Google App Engine or Cloud Run."
+          ::Rake::Task.define_task "serverless:exec", [:cmd] do |_t, args|
             verify_gcloud_and_report_errors
             command = extract_command args[:cmd], ::ARGV
             app_exec = Exec.new command,
@@ -182,11 +182,11 @@ module Google
             i = (argv.index { |a| a.to_s == "--" } || -1) + 1
             if i.zero?
               report_error <<~MESSAGE
-                No command provided for appengine:exec.
+                No command provided for serverless:exec.
                 Did you remember to delimit it with two dashes? e.g.
-                bundle exec rake appengine:exec -- bundle exec ruby myscript.rb
+                bundle exec rake serverless:exec -- bundle exec ruby myscript.rb
                 For detailed usage instructions, provide two dashes but no command:
-                bundle exec rake appengine:exec --
+                bundle exec rake serverless:exec --
               MESSAGE
             end
             command = ::ARGV[i..-1]
@@ -200,30 +200,30 @@ module Google
   
         def show_usage
           puts <<~USAGE
-            rake appengine:exec
-            This Rake task executes a given command in the context of an App Engine
+            rake serverless:exec
+            This Rake task executes a given command in the context of an App Engine or Cloud Run
             application, using App Engine remote execution. For more information,
-            on this capability, see the AppEngine::Exec documentation at
+            on this capability, see the Google::Serverless::Exec documentation at
             http://www.rubydoc.info/gems/appengine/AppEngine/Exec
             The command to be run may either be provided as a rake argument, or as
             command line arguments delimited by two dashes `--`. (The dashes are
             needed to separate your command from rake arguments and flags.)
             For example, to run a production database migration, you can run either
             of the following equivalent commands:
-                bundle exec rake "appengine:exec[bundle exec bin/rails db:migrate]"
-                bundle exec rake appengine:exec -- bundle exec bin/rails db:migrate
+                bundle exec rake "serverless:exec[bundle exec bin/rails db:migrate]"
+                bundle exec rake serverless:exec -- bundle exec bin/rails db:migrate
             To display these usage instructions, provide two dashes but no command:
-                bundle exec rake appengine:exec --
+                bundle exec rake serverless:exec --
             You may customize the behavior of App Engine execution through a few
             enviroment variable parameters. These are set via the normal mechanism at
             the end of a rake command line but before the double dash. For example, to
             set GAE_CONFIG:
-                bundle exec rake appengine:exec GAE_CONFIG=myservice.yaml -- bundle exec bin/rails db:migrate
+                bundle exec rake serverless:exec GAE_CONFIG=myservice.yaml -- bundle exec bin/rails db:migrate
             Be sure to set these parameters before the double dash. Any arguments
             following the double dash are interpreted as part of the command itself.
             The following environment variable parameters are supported:
             GAE_TIMEOUT
-              Amount of time to wait before appengine:exec terminates the command.
+              Amount of time to wait before serverless:exec terminates the command.
               Expressed as a string formatted like: "2h15m10s". Default is "10m".
             GAE_PROJECT
               The ID of your Google Cloud project. If not specified, uses the current
@@ -303,9 +303,9 @@ module Google
             Could not determine which service should run this command because the App
             Engine config file "#{e.config_path}" was not found.
             Specify the config file using the GAE_CONFIG argument. e.g.
-              bundle exec rake appengine:exec GAE_CONFIG=myapp.yaml -- myscript.sh
+              bundle exec rake serverless:exec GAE_CONFIG=myapp.yaml -- myscript.sh
             Alternately, you may specify a service name directly with GAE_SERVICE. e.g.
-              bundle exec rake appengine:exec GAE_SERVICE=myservice -- myscript.sh
+              bundle exec rake serverless:exec GAE_SERVICE=myservice -- myscript.sh
           MESSAGE
         rescue Exec::BadConfigFileFormat => e
           report_error <<~MESSAGE
@@ -313,9 +313,9 @@ module Google
             Engine config file "#{e.config_path}" was malformed.
             It must be a valid YAML file.
             Specify the config file using the GAE_CONFIG argument. e.g.
-              bundle exec rake appengine:exec GAE_CONFIG=myapp.yaml -- myscript.sh
+              bundle exec rake serverless:exec GAE_CONFIG=myapp.yaml -- myscript.sh
             Alternately, you may specify a service name directly with GAE_SERVICE. e.g.
-              bundle exec rake appengine:exec GAE_SERVICE=myservice -- myscript.sh
+              bundle exec rake serverless:exec GAE_SERVICE=myservice -- myscript.sh
           MESSAGE
         rescue Exec::NoSuchVersion => e
           if e.version
@@ -339,7 +339,7 @@ module Google
             Please either set the current project using
               gcloud config set project my-project-id
             or specify the project by setting the GAE_PROJECT argument. e.g.
-              bundle exec rake appengine:exec GAE_PROJECT=my-project-id -- myscript.sh
+              bundle exec rake serverless:exec GAE_PROJECT=my-project-id -- myscript.sh
           MESSAGE
         rescue Exec::UsageError => e
           report_error e.message
