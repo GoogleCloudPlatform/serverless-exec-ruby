@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Copyright 2019 Google LLC
+# Copyright 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
 
 lib = File.expand_path "lib", __dir__
 $LOAD_PATH.unshift lib unless $LOAD_PATH.include? lib
-require "serverlessexec/version"
+require "serverless/version"
 
 ::Gem::Specification.new do |spec|
-  spec.name = "severlessexec"
+  spec.name = "severless"
   spec.version = ::Google::Serverless::Exec
   spec.authors = ["Daniel Azuma", "Tram Bui"]
   spec.email = ["dazuma@gmail.com", "trambui09098@gmail.com"]
