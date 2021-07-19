@@ -16,7 +16,9 @@
 
 module Google
   module Serverless
-    # The current version of this gem, as a string.
-    VERSION = "0.1.0"
+    class Exec
+      # The current version of this gem, as a string.
+      VERSION = "0.1.0"
+    end
   end
 end

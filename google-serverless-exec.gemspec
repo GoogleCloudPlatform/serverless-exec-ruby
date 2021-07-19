@@ -47,7 +47,7 @@ require "google/serverless/version"
   spec.add_dependency "stackdriver", "~> 0.20", ">= 0.20.1"
 
   spec.add_development_dependency "bundler", "~> 2.0"
-  spec.add_development_dependency "google-style", "~> 1.24.0"
+  spec.add_development_dependency "google-style", "~> 1.25.1"
   spec.add_development_dependency "minitest", "~> 5.11"
   spec.add_development_dependency "minitest-focus", "~> 1.1"
   spec.add_development_dependency "minitest-rg", "~> 5.2"
