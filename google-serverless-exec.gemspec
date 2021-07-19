@@ -19,7 +19,7 @@ $LOAD_PATH.unshift lib unless $LOAD_PATH.include? lib
 require "google/serverless/version"
 
 ::Gem::Specification.new do |spec|
-  spec.name = "google-everless-exec"
+  spec.name = "google-severless-exec"
   spec.version = ::Google::Serverless::VERSION
   spec.authors = ["Daniel Azuma", "Tram Bui"]
   spec.email = ["dazuma@gmail.com", "trambui09098@gmail.com"]
