@@ -16,7 +16,7 @@
 
 lib = File.expand_path "lib", __dir__
 $LOAD_PATH.unshift lib unless $LOAD_PATH.include? lib
-require "serverless/version"
+require "google/serverless/version"
 
 ::Gem::Specification.new do |spec|
   spec.name = "severless"
@@ -26,13 +26,13 @@ require "serverless/version"
 
   spec.summary = "Google Cloud integration tools"
   spec.description =
-    "The cloudexec gem is a set of classes, plugins, and tools for" \
-    " integration with Google App Engine and Cloud Run. It provides access to the App" \
-    " Engine and Cloud Run runtime environments, including logging to the Google Cloud" \
+    " The serverless exec gem is a set of classes, plugins, and tools for" \
+    " integration with Google Serverless compute. It provides access to the" \
+    " runtime environments, including logging to the Google Cloud" \
     " Console and interrogation of hosting properties. It also provides Rake" \
-    " tasks for managing your App Engine and Cloud Run applications, for example to run" \
+    " tasks for managing your serverless applications, for example to run" \
     " production maintenance commands such as database migrations. This gem" \
-    " is NOT required to deploy your Ruby application to App Engine or Cloud Run."
+    " is NOT required to deploy your Ruby application to Google Serverless compute."
   spec.license = "Apache-2.0"
   spec.homepage = "https://github.com/GoogleCloudPlatform/google-serverless-exec"
 
