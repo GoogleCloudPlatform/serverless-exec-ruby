@@ -20,7 +20,7 @@ require "google/serverless/version"
 
 ::Gem::Specification.new do |spec|
   spec.name = "severless-exec"
-  spec.version = ::Google::Serverless::Exec
+  spec.version = ::Google::Serverless::VERSION
   spec.authors = ["Daniel Azuma", "Tram Bui"]
   spec.email = ["dazuma@gmail.com", "trambui09098@gmail.com"]
 
