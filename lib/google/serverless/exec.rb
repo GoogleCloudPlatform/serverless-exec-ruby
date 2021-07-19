@@ -28,23 +28,23 @@ require "serverless/util/gcloud"
 module Google
   module Serverless
     ##
-    # # App Engine remote execution
+    # # Serverless execution tool
     #
-    # This class provides a client for App Engine remote execution, allowing
-    # App Engine applications to perform on-demand tasks in the App Engine
+    # This class provides a client for serverless execution, allowing
+    # Serverless applications to perform on-demand tasks in the serverless
     # environment. This may be used for safe running of ops and maintenance
     # tasks, such as database migrations, that access production cloud resources.
     #
-    # ## About App Engine execution
+    # ## About serverless execution tool
     #
-    # App Engine execution spins up a one-off copy of an App Engine app, and runs
+    # Serverless execution spins up a one-off copy of a serverless app, and runs
     # a command against it. For example, if your app runs on Ruby on Rails, then
-    # you might use App Engine execution to run a command such as
+    # you might use serverless execution to run a command such as
     # `bundle exec bin/rails db:migrate` in production infrastructure (to avoid
     # having to connect directly to your production database from a local
     # workstation).
     #
-    # App Engine execution provides two strategies for generating that "one-off
+    # Serverless execution provides two strategies for generating that "one-off
     # copy":
     #
     #  *  A `deployment` strategy, which deploys a temporary version of your app
@@ -52,7 +52,7 @@ module Google
     #  *  A `cloud_build` strategy, which deploys your application image to
     #     Google Cloud Build and runs the command there.
     #
-    # Both strategies are generally designed to emulate the App Engine runtime
+    # Both strategies are generally designed to emulate the runtime
     # environment on cloud VMs similar to those used by actual deployments of
     # your app. Both provide your application code and environment variables, and
     # both provide access to Cloud SQL connections used by your app. However,
@@ -60,12 +60,12 @@ module Google
     # certain other constraints and performance characteristics. More detailed
     # information on using the two strategies is provided in the sections below.
     #
-    # Apps deployed to the App Engine *flexible environment* will use the
+    # Apps deployed to the App Engine *flexible environment* and Cloud Run will use the
     # `cloud_build` strategy by default. However, you can force an app to use the
     # `deployment` strategy instead. (You might do so if you need to connect to a
     # Cloud SQL database on a VPC using a private IP, because the `cloud_build`
     # strategy does not support private IPs.) To force use of `deployment`, set
-    # the `strategy` parameter in the {AppEngine::Exec} constructor (or the
+    # the `strategy` parameter in the {Google::Serverless::Exec} constructor (or the
     # corresponding `GAE_EXEC_STRATEGY` parameter in the Rake task). Note that
     # the `deployment` strategy is usually significantly slower than
     # `cloud_build` for apps in the flexible environment.
@@ -76,15 +76,15 @@ module Google
     #
     # ## Prerequisites
     #
-    # To use App Engine remote execution, you will need:
+    # To use this tool, you will need:
     #
-    # * An app deployed to Google App Engine, of course!
+    # * An app deployed to Google serverless compute, of course!
     # * The [gcloud SDK](https://cloud.google.com/sdk/) installed and configured.
-    # * The `appengine` gem.
+    # * The `serverless` gem.
     #
-    # You may use the `AppEngine::Exec` class to run commands directly. However,
+    # You may use the `Google::Serverless::Exec` class to run commands directly. However,
     # in most cases, it will be easier to run commands via the provided rake
-    # tasks (see {AppEngine::Tasks}).
+    # tasks (see {Google::Serverless::Tasks}).
     #
     # ## Using the "deployment" strategy
     #
@@ -115,19 +115,19 @@ module Google
     #
     # By default, your Google Cloud project is taken from the current gcloud
     # project. If you need to override this, set the `:project` parameter in the
-    # {AppEngine::Exec} constructor (or the corresponding `GAE_PROJECT`
+    # {Google::Serverless::Exec} constructor (or the corresponding `GAE_PROJECT`
     # parameter in the Rake task).
     #
     # By default, the service name is taken from the App Engine config file.
-    # App Engine execution will assume this file is called `app.yaml` in the
+    # Serverless execution will assume this file is called `app.yaml` in the
     # current directory. To use a different config file, set the `config_path`
-    # parameter in the {AppEngine::Exec} constructor (or the corresponding
+    # parameter in the {Google::Serverless::Exec} constructor (or the corresponding
     # `GAE_CONFIG` parameter in the Rake task). You may also set the service name
     # directly, using the `service` parameter (or `GAE_SERVICE` in Rake).
     #
     # ### Providing credentials
     #
-    # Your command will effectively be a deployment of your App Engine app
+    # Your command will effectively be a deployment of your serverless app
     # itself, and will have access to the same credentials. For example, App
     # Engine provides a service account by default for your app, or your app may
     # be making use of its own service account key. In either case, make sure the
@@ -136,12 +136,12 @@ module Google
     #
     # ### Other options
     #
-    # You may also provide a timeout, which is the length of time that App
-    # Engine execution will allow your command to run before it is considered to
+    # You may also provide a timeout, which is the length of time that serverless
+    # execution will allow your command to run before it is considered to
     # have stalled and is terminated. The timeout should be a string of the form
     # `2h15m10s`. The default is `10m`.
     #
-    # The timeout is set via the `timeout` parameter to the {AppEngine::Exec}
+    # The timeout is set via the `timeout` parameter to the {Google::Serverless::Exec}
     # constructor, or by setting the `GAE_TIMEOUT` environment variable when
     # invoking using Rake.
     #
@@ -156,19 +156,19 @@ module Google
     # temporary instance may not get deleted properly. If you suspect this may
     # have happened, go to the App Engine tab in the cloud console, under
     # "versions" of your service, and delete the temporary version manually. It
-    # will have a name matching the pattern `appengine-exec-<timestamp>`.
+    # will have a name matching the pattern `serverless-exec-<timestamp>`.
     #
     # ## Using the "cloud_build" strategy
     #
-    # The `cloud_build` strategy takes the application image that App Engine is
+    # The `cloud_build` strategy takes the application image that App Engine or Cloud Run is
     # actually using to run your app, and uses it to spin up a copy of your app
     # in [Google Cloud Build](https://cloud.google.com/cloud-build) (along with
-    # an emulation layer that emulates certain App Engine services such as Cloud
+    # an emulation layer that emulates certain serverless services such as Cloud
     # SQL connection sockets). The command then gets run in the Cloud Build
     # environment.
     #
-    # This is the default strategy for apps running on the App Engine flexible
-    # environment. (It is not available for standard environment apps.) Note that
+    # This is the default strategy for apps running on the App Engine flexible and Cloud
+    # Run environments. (It is not available for standard environment apps.) Note that
     # the `cloud_build` strategy cannot be used if your command needs to connect
     # to a database over a [VPC](https://cloud.google.com/vpc/) private IP
     # address. This is because it runs on virtual machines provided by the Cloud
@@ -188,13 +188,13 @@ module Google
     #
     # By default, your Google Cloud project is taken from the current gcloud
     # project. If you need to override this, set the `:project` parameter in the
-    # {AppEngine::Exec} constructor (or the corresponding `GAE_PROJECT`
+    # {Google::Serverless::Exec} constructor (or the corresponding `GAE_PROJECT`
     # parameter in the Rake task).
     #
     # By default, the service name is taken from the App Engine config file.
-    # App Engine execution will assume this file is called `app.yaml` in the
+    # Serverless execution will assume this file is called `app.yaml` in the
     # current directory. To use a different config file, set the `config_path`
-    # parameter in the {AppEngine::Exec} constructor (or the corresponding
+    # parameter in the {Google::Serverless::Exec} constructor (or the corresponding
     # `GAE_CONFIG` parameter in the Rake task). You may also set the service name
     # directly, using the `service` parameter (or `GAE_SERVICE` in Rake).
     #
@@ -202,8 +202,8 @@ module Google
     # used. (Note that this most recently deployed version may not be the same
     # version that is currently receiving traffic: for example, if you deployed
     # with `--no-promote`.) To use a different version, set the `version`
-    # parameter in the {AppEngine::Exec} constructor (or the corresponding
-    # `GAE_VERSION` parameter in the Rake task).
+    # parameter in the {Google::Serverless::Exec} constructor 
+    # (or the corresponding `GAE_VERSION` parameter in the Rake task).
     #
     # ### Providing credentials
     #
@@ -218,12 +218,12 @@ module Google
     #
     # ### Other options
     #
-    # You may also provide a timeout, which is the length of time that App
-    # Engine execution will allow your command to run before it is considered to
+    # You may also provide a timeout, which is the length of time that
+    # serverless execution will allow your command to run before it is considered to
     # have stalled and is terminated. The timeout should be a string of the form
     # `2h15m10s`. The default is `10m`.
     #
-    # The timeout is set via the `timeout` parameter to the {AppEngine::Exec}
+    # The timeout is set via the `timeout` parameter to the {Google::Serverless::Exec}
     # constructor, or by setting the `GAE_TIMEOUT` environment variable when
     # invoking using Rake.
     #
@@ -358,19 +358,19 @@ module Google
         # @param config_path [String,nil] App Engine config file to get the
         #     service name from if the service name is not provided directly.
         #     If omitted, defaults to the value returned by
-        #     {AppEngine::Exec.default_config_path}.
+        #     {Google::Serverless::Exec.default_config_path}.
         # @param version [String,nil] Version string. If omitted, defaults to the
         #     most recently created version of the given service (which may not
         #     be the one currently receiving traffic).
         # @param timeout [String,nil] Timeout string. If omitted, defaults to the
-        #     value returned by {AppEngine::Exec.default_timeout}.
+        #     value returned by {Google::Serverless::Exec.default_timeout}.
         # @param wrapper_image [String,nil] The fully qualified name of the
         #     wrapper image to use. (Applies only to the "cloud_build" strategy.)
         # @param strategy [String,nil] The execution strategy to use, or `nil` to
-        #     choose a default based on the App Engine environment (flexible or
-        #     standard). Allowed values are `nil`, `"deployment"` (which is the
-        #     default for Standard), and `"cloud_build"` (which is the default
-        #     for Flexible).
+        #     choose a default based on the App Engine (flexible or standard) or Cloud  Run
+        #     environments. Allowed values are `nil`, `"deployment"` (which is the
+        #     default for App Engine Standard), and `"cloud_build"` (which is the default
+        #     for App Engine Flexible and Cloud Run).
         # @param gcs_log_dir [String,nil] GCS bucket name of the cloud build log
         #     when strategy is "cloud_build". (ex. "gs://BUCKET-NAME/FOLDER-NAME")
         #
@@ -405,19 +405,19 @@ module Google
       # @param config_path [String,nil] App Engine config file to get the
       #     service name from if the service name is not provided directly.
       #     If omitted, defaults to the value returned by
-      #     {AppEngine::Exec.default_config_path}.
+      #     {Google::Serverless::Exec.default_config_path}.
       # @param version [String,nil] Version string. If omitted, defaults to the
       #     most recently created version of the given service (which may not be
       #     the one currently receiving traffic).
       # @param timeout [String,nil] Timeout string. If omitted, defaults to the
-      #     value returned by {AppEngine::Exec.default_timeout}.
+      #     value returned by {Google::Serverless::Exec.default_timeout}.
       # @param wrapper_image [String,nil] The fully qualified name of the wrapper
       #     image to use. (Applies only to the "cloud_build" strategy.)
       # @param strategy [String,nil] The execution strategy to use, or `nil` to
-      #     choose a default based on the App Engine environment (flexible or
-      #     standard). Allowed values are `nil`, `"deployment"` (which is the
-      #     default for Standard), and `"cloud_build"` (which is the default for
-      #     Flexible).
+      #     choose a default based on the App Engine environment (flexible or standard) or
+      #     Cloud Run environemnts. Allowed values are `nil`, `"deployment"` (which is the
+      #     default for App Engine Standard), and `"cloud_build"` (which is the default for
+      #     App Engine Flexible and Cloud Run).
       # @param gcs_log_dir [String,nil] GCS bucket name of the cloud build log
       #     when strategy is "cloud_build". (ex. "gs://BUCKET-NAME/FOLDER-NAME")
       #
@@ -485,8 +485,8 @@ module Google
       ##
       # @return [String] The execution strategy to use. Allowed values are
       #     `"deployment"` and `"cloud_build"`.
-      # @return [nil] to choose a default based on the App Engine environment
-      #     (flexible or standard).
+      # @return [nil] to choose a default based on the App Engine (flexible or standard)
+      #     or Cloud Run environments.
       #
       attr_accessor :strategy
   
@@ -641,7 +641,7 @@ module Google
       end
   
       def describe_deployment_strategy
-        puts "\nUsing the `deployment` strategy for appengine:exec"
+        puts "\nUsing the `deployment` strategy for serverless:exec"
         puts "(i.e. deploying a temporary version of your app)"
         puts "PROJECT: #{@project}"
         puts "SERVICE: #{@service}"

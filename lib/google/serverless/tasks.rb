@@ -23,7 +23,7 @@ require "serverless/exec"
 module Google
   module Serverless
     ##
-    # # App Engine Rake Tasks.
+    # # Serverless Rake Tasks.
     #
     # To make these tasks available, add the line `require "serverless/tasks"`
     # to your Rakefile. If your app uses Ruby on Rails, then the serverless gem
@@ -34,9 +34,8 @@ module Google
     #
     # ## Rake serverless:exec
     #
-    # Executes a given command in the context of an App Engine application, using
-    # App Engine remote execution. See {Google::Serverless::Exec} for more information on
-    # this capability.
+    # Executes a given command in the context of a serverless application. 
+    # See {Google::Serverless::Exec} for more information on this capability.
     #
     # The command to be run may either be provided as a rake argument, or as
     # command line arguments, delimited by two dashes `--`. (The dashes are
@@ -53,7 +52,7 @@ module Google
     #
     # ### Parameters
     #
-    # You may customize the behavior of App Engine execution through a few
+    # You may customize the behavior of the serverless execution through a few
     # enviroment variable parameters. These are set via the normal mechanism at
     # the end of a rake command line. For example, to set GAE_CONFIG:
     #
@@ -157,7 +156,7 @@ module Google
   
         def setup_exec_task
           ::Rake.application.last_description =
-            "Execute the given command in Google App Engine or Cloud Run."
+            "Execute the given command in a Google serverless application."
           ::Rake::Task.define_task "serverless:exec", [:cmd] do |_t, args|
             verify_gcloud_and_report_errors
             command = extract_command args[:cmd], ::ARGV
@@ -201,8 +200,8 @@ module Google
         def show_usage
           puts <<~USAGE
             rake serverless:exec
-            This Rake task executes a given command in the context of an App Engine or Cloud Run
-            application, using App Engine remote execution. For more information,
+            This Rake task executes a given command in the context of a serverless
+            application. For more information,
             on this capability, see the Google::Serverless::Exec documentation at
             http://www.rubydoc.info/gems/appengine/AppEngine/Exec
             The command to be run may either be provided as a rake argument, or as
@@ -214,7 +213,7 @@ module Google
                 bundle exec rake serverless:exec -- bundle exec bin/rails db:migrate
             To display these usage instructions, provide two dashes but no command:
                 bundle exec rake serverless:exec --
-            You may customize the behavior of App Engine execution through a few
+            You may customize the behavior of the serverless execution through a few
             enviroment variable parameters. These are set via the normal mechanism at
             the end of a rake command line but before the double dash. For example, to
             set GAE_CONFIG:
@@ -238,7 +237,7 @@ module Google
             GAE_EXEC_STRATEGY
               The execution strategy to use. Valid values are "deployment" (which is the
               default for App Engine Standard apps) and "cloud_build" (which is the
-              default for App Engine Flexible apps).
+              default for App Engine Flexible and Cloud Run apps).
               Normally you should leave the strategy set to the default. The main reason
               to change it is if your app runs on the Flexible Environment and talks to
               a database over a VPC (using a private IP address). The "cloud_build"
@@ -260,14 +259,14 @@ module Google
             CLOUD_BUILD_GCS_LOG_DIR
               GCS bucket name of the cloud build log when GAE_STRATEGY is "cloud_build".
               (ex. "gs://BUCKET-NAME/FOLDER-NAME")
-            This rake task is provided by the "appengine" gem. To make these tasks
+            This rake task is provided by the "serverless" gem. To make these tasks
             available, add the following line to your Rakefile:
-                require "appengine/tasks"
+                require "serverless/tasks"
             If your app uses Ruby on Rails, the gem provides a railtie that adds its
             tasks automatically, so you don't have to do anything beyond adding the
             gem to your Gemfile.
             For more information or to report issues, visit the Github page:
-            https://github.com/GoogleCloudPlatform/appengine-ruby
+            https://github.com/GoogleCloudPlatform/google-serverless-exec
           USAGE
         end
   
