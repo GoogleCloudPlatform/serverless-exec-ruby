@@ -17,8 +17,8 @@
 
 require "shellwords"
 
-require "serverless/util/gcloud"
-require "serverless/exec"
+require "google/serverless/exec/gcloud"
+require "google/serverless/exec"
 
 module Google
   module Serverless

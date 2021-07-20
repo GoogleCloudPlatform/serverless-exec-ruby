@@ -23,7 +23,7 @@ require "shellwords"
 require "tempfile"
 require "yaml"
 
-require "serverless/util/gcloud"
+require "google/serverless/exec/gcloud"
 
 module Google
   module Serverless

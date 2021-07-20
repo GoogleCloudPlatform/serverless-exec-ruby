@@ -16,7 +16,7 @@
 
 lib = File.expand_path "lib", __dir__
 $LOAD_PATH.unshift lib unless $LOAD_PATH.include? lib
-require "google/serverless/version"
+require "google/serverless/exec/version"
 
 ::Gem::Specification.new do |spec|
   spec.name = "google-severless-exec"
@@ -42,9 +42,6 @@ require "google/serverless/version"
                ["LICENSE", ".yardopts"]
   spec.required_ruby_version = ">= 2.4.0"
   spec.require_paths = ["lib"]
-
-  spec.add_dependency "google-cloud-env", "~> 1.4"
-  spec.add_dependency "stackdriver", "~> 0.20", ">= 0.20.1"
 
   spec.add_development_dependency "bundler", "~> 2.0"
   spec.add_development_dependency "google-style", "~> 1.25.1"
