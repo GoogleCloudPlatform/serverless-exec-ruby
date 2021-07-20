@@ -10,7 +10,7 @@ Metrics/ClassLength:
 Metrics/MethodLength:
   Exclude:
     - "lib/google/serverless/exec.rb""
-    - "lib/google/serverless/tasks.rb"
+    - "lib/google/serverless/exec/tasks.rb"
 Metrics/ModuleLength:
   Exclude:
-    - "lib/google/serverless/tasks.rb"
+    - "lib/google/serverless/exec/tasks.rb"

@@ -39,6 +39,6 @@ require "yard"
 require "yard/rake/yardoc_task"
 YARD::Rake::YardocTask.new
 
-load "lib/google/serverless/tasks.rb"
+load "lib/google/serverless/exec/tasks.rb"
 
 task default: [:test]
