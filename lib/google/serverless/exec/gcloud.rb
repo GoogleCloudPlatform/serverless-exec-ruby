@@ -20,7 +20,7 @@ require "English"
 
 module Google
   module Serverless
-    module Exec
+    class Exec
       ##
       # A collection of utility functions and classes for interacting with an
       # installation of the gcloud SDK.
