@@ -355,4 +355,4 @@ module Google
   end
 end
 
-::Google::Serverless::Tasks.define
+::Google::Serverless::Exec::Tasks.define
