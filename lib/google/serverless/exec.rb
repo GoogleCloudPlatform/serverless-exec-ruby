@@ -494,7 +494,7 @@ module Google
       # Executes the command synchronously. Streams the logs back to standard out
       # and does not return until the command has completed or timed out.
       #
-      def start
+      def start_app_engine
         resolve_parameters
         app_info = version_info @service, @version
         resolve_strategy app_info["env"]
@@ -546,7 +546,7 @@ module Google
       end
   
       def default_project
-        result = Util::Gcloud.execute \
+        result = Exec::Gcloud.execute \
           ["config", "get-value", "project"],
           capture: true, assert: false
         result.strip!
@@ -572,7 +572,7 @@ module Google
       # @return [String] Name of the most recent version.
       #
       def latest_version service
-        result = Util::Gcloud.execute \
+        result = Exec::Gcloud.execute \
           [
             "app", "versions", "list",
             "--project", @project,
@@ -602,7 +602,7 @@ module Google
       def version_info service, version
         service ||= "default"
         version ||= latest_version service
-        result = Util::Gcloud.execute \
+        result = Exec::Gcloud.execute \
           [
             "app", "versions", "describe", version,
             "--project", @project,
@@ -780,7 +780,7 @@ module Google
             "--timeout", @timeout
           ]
           execute_command.concat ["--gcs-log-dir", @gcs_log_dir] unless @gcs_log_dir.nil?
-          Util::Gcloud.execute execute_command
+          Exec::Gcloud.execute execute_command
         ensure
           file.close!
         end
