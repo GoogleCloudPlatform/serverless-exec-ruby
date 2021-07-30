@@ -135,6 +135,8 @@ module Google
         WRAPPER_IMAGE_ENV = "GAE_EXEC_WRAPPER_IMAGE"
         ## @private
         GCS_LOG_DIR = "CLOUD_BUILD_GCS_LOG_DIR"
+        ## @private
+        PRODUCT_ENV = "PRODUCT"
     
         @defined = false
     
@@ -169,7 +171,8 @@ module Google
                                   timeout:       ::ENV[TIMEOUT_ENV],
                                   wrapper_image: ::ENV[WRAPPER_IMAGE_ENV],
                                   strategy:      ::ENV[STRATEGY_ENV],
-                                  gcs_log_dir:   ::ENV[GCS_LOG_DIR]
+                                  gcs_log_dir:   ::ENV[GCS_LOG_DIR],
+                                  product:       ::ENV[PRODUCT_ENV]
               start_and_report_errors app_exec
               exit
             end
@@ -297,7 +300,7 @@ module Google
           end
     
           def start_and_report_errors app_exec
-            app_exec.start
+            app_exec.product == "app_engine" ? app_exec.start_app_engine : app_exec.start_cloud_run
           rescue Exec::ConfigFileNotFound => e
             report_error <<~MESSAGE
               Could not determine which service should run this command because the App
