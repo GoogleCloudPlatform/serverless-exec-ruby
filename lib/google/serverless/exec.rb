@@ -425,7 +425,7 @@ module Google
       #     when strategy is "cloud_build". (ex. "gs://BUCKET-NAME/FOLDER-NAME")
       # @param product [Symbol] The serverless product. If omitted, defaults to the
       #     value returns by {Google::Serverless::Exec.default_product}.
-      #     Allowed values are `APP_ENGINE` and `CLOUD_RUN`.
+      #     Allowed values are {APP_ENGINE} and {CLOUD_RUN}.
       #
       def initialize command,
                      project: nil, service: nil, config_path: nil, version: nil,
@@ -499,7 +499,7 @@ module Google
 
       ##
       # @return [Symbol] The serverless product to use.
-      #     Allowed values are `APP_ENGINE` and  `CLOUD_RUN`
+      #     Allowed values are {APP_ENGINE} and  {CLOUD_RUN}
       #
       attr_accessor :product
   
