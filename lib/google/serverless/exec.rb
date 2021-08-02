@@ -250,6 +250,9 @@ module Google
       @default_service = "default"
       @default_config_path = "./app.yaml"
       @default_wrapper_image = "gcr.io/google-appengine/exec-wrapper:latest"
+
+      APP_ENGINE = :app_engine
+      CLOUD_RUN = :cloud_run
   
       ##
       # Base class for exec-related usage errors.
@@ -415,11 +418,14 @@ module Google
       #     image to use. (Applies only to the "cloud_build" strategy.)
       # @param strategy [String,nil] The execution strategy to use, or `nil` to
       #     choose a default based on the App Engine environment (flexible or standard) or
-      #     Cloud Run environemnts. Allowed values are `nil`, `"deployment"` (which is the
+      #     Cloud Run environments. Allowed values are `nil`, `"deployment"` (which is the
       #     default for App Engine Standard), and `"cloud_build"` (which is the default for
       #     App Engine Flexible and Cloud Run).
       # @param gcs_log_dir [String,nil] GCS bucket name of the cloud build log
       #     when strategy is "cloud_build". (ex. "gs://BUCKET-NAME/FOLDER-NAME")
+      # @param product [Symbol] The serverless product. If omitted, defaults to the
+      #     value returns by {Google::Serverless::Exec.default_product}.
+      #     Allowed values are `APP_ENGINE` and `CLOUD_RUN`.
       #
       def initialize command,
                      project: nil, service: nil, config_path: nil, version: nil,
@@ -492,17 +498,26 @@ module Google
       attr_accessor :strategy
 
       ##
-      # @return [String] The serverless product to use.
-      # @return [nil] if App Engine default should be used.
+      # @return [Symbol] The serverless product to use.
+      #     Allowed values are `APP_ENGINE` and  `CLOUD_RUN`
       #
       attr_accessor :product
   
       ##
       # Executes the command synchronously. Streams the logs back to standard out
       # and does not return until the command has completed or timed out.
-      #
-      def start_app_engine
+      
+      def start
         resolve_parameters
+        case @product
+        when APP_ENGINE
+          start_app_engine
+        when CLOUD_RUN
+          start_cloud_run
+        end
+      end
+
+      def start_app_engine
         app_info = version_info @service, @version
         resolve_strategy app_info["env"]
         if @strategy == "cloud_build"
@@ -513,7 +528,6 @@ module Google
       end
 
       def start_cloud_run
-        resolve_parameters
         app_info = version_info_cloud_run @service
         start_build_strategy app_info
       end
@@ -533,7 +547,7 @@ module Google
         @timeout_seconds = parse_timeout @timeout
         @wrapper_image ||= Exec.default_wrapper_image
         @product ||= default_product
-        if @product == "app_engine" 
+        if @product == APP_ENGINE
           @version ||= latest_version @service
         end
         self
@@ -571,11 +585,7 @@ module Google
       end
 
       def default_product
-        if File.file?("/.app.yaml")
-          result = "app_engine"
-        else
-          result = "cloud_run"
-        end
+        File.file?("app.yaml") ? APP_ENGINE : CLOUD_RUN
       end
   
       def parse_timeout timeout_str
@@ -795,7 +805,7 @@ module Google
       # Performs exec on a GAE flexible app.
       #
       def start_build_strategy app_info
-        if @product == "app_engine"
+        if @product == APP_ENGINE
           env_variables = app_info["envVariables"] || {}
           beta_settings = app_info["betaSettings"] || {}
           cloud_sql_instances = beta_settings["cloud_sql_instances"] || []
@@ -804,7 +814,6 @@ module Google
         else
           env_variables = {}
           cloud_sql_instances = []
-          p "it got here - start_build_stategy_cloud_run"
           # TODO: get the cloud_sql_instance
           image = app_info["spec"]["template"]["spec"]["containers"][0]["image"]
         end

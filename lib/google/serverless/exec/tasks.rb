@@ -163,6 +163,7 @@ module Google
             ::Rake::Task.define_task "serverless:exec", [:cmd] do |_t, args|
               verify_gcloud_and_report_errors
               command = extract_command args[:cmd], ::ARGV
+              selected_product = extract_product ::ENV[PRODUCT_ENV]
               app_exec = Exec.new command,
                                   project:       ::ENV[PROJECT_ENV],
                                   service:       ::ENV[SERVICE_ENV],
@@ -172,7 +173,7 @@ module Google
                                   wrapper_image: ::ENV[WRAPPER_IMAGE_ENV],
                                   strategy:      ::ENV[STRATEGY_ENV],
                                   gcs_log_dir:   ::ENV[GCS_LOG_DIR],
-                                  product:       ::ENV[PRODUCT_ENV]
+                                  product:       selected_product
               start_and_report_errors app_exec
               exit
             end
@@ -198,6 +199,22 @@ module Google
                 exit
               end
               command
+            end
+          end
+
+          def extract_product product
+            if product
+              product = product.dup
+              product.downcase!
+              
+              case product
+              when "app_engine"
+                APP_ENGINE
+              when "cloud_run"
+                CLOUD_RUN
+              end
+            else
+              nil
             end
           end
     
@@ -300,7 +317,7 @@ module Google
           end
     
           def start_and_report_errors app_exec
-            app_exec.product == "app_engine" ? app_exec.start_app_engine : app_exec.start_cloud_run
+            app_exec.start
           rescue Exec::ConfigFileNotFound => e
             report_error <<~MESSAGE
               Could not determine which service should run this command because the App
