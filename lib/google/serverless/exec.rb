@@ -813,9 +813,9 @@ module Google
           image = container ? container["image"] : image_from_build(app_info)
         else
           env_variables = {}
-          cloud_sql_instances = []
-          # TODO: get the cloud_sql_instance
-          image = app_info["spec"]["template"]["spec"]["containers"][0]["image"]
+          metadata_annotations = app_info["spec"]["template"]["metadata"]["annotations"]
+          cloud_sql_instances = metadata_annotations["run.googleapis.com/cloudsql-instances"] || []
+          image = metadata_annotations["client.knative.dev/user-image"]
         end
   
         describe_build_strategy
