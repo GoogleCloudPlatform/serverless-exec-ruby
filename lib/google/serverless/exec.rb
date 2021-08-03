@@ -250,6 +250,9 @@ module Google
       @default_service = "default"
       @default_config_path = "./app.yaml"
       @default_wrapper_image = "gcr.io/google-appengine/exec-wrapper:latest"
+
+      APP_ENGINE = :app_engine
+      CLOUD_RUN = :cloud_run
   
       ##
       # Base class for exec-related usage errors.
@@ -377,7 +380,7 @@ module Google
         def new_rake_task name, args: [], env_args: [],
                           service: nil, config_path: nil, version: nil,
                           timeout: nil, project: nil, wrapper_image: nil,
-                          strategy: nil, gcs_log_dir: nil
+                          strategy: nil, gcs_log_dir: nil, product: nil
           escaped_args = args.map do |arg|
             arg.gsub(/[,\[\]]/) { |m| "\\#{m}" }
           end
@@ -390,7 +393,7 @@ module Google
           new ["bundle", "exec", "rake", name_with_args] + env_args,
               service: service, config_path: config_path, version: version,
               timeout: timeout, project: project, wrapper_image: wrapper_image,
-              strategy: strategy, gcs_log_dir: gcs_log_dir
+              strategy: strategy, gcs_log_dir: gcs_log_dir, product: product
         end
       end
   
@@ -415,15 +418,18 @@ module Google
       #     image to use. (Applies only to the "cloud_build" strategy.)
       # @param strategy [String,nil] The execution strategy to use, or `nil` to
       #     choose a default based on the App Engine environment (flexible or standard) or
-      #     Cloud Run environemnts. Allowed values are `nil`, `"deployment"` (which is the
+      #     Cloud Run environments. Allowed values are `nil`, `"deployment"` (which is the
       #     default for App Engine Standard), and `"cloud_build"` (which is the default for
       #     App Engine Flexible and Cloud Run).
       # @param gcs_log_dir [String,nil] GCS bucket name of the cloud build log
       #     when strategy is "cloud_build". (ex. "gs://BUCKET-NAME/FOLDER-NAME")
+      # @param product [Symbol] The serverless product. If omitted, defaults to the
+      #     value returns by {Google::Serverless::Exec.default_product}.
+      #     Allowed values are {APP_ENGINE} and {CLOUD_RUN}.
       #
       def initialize command,
                      project: nil, service: nil, config_path: nil, version: nil,
-                     timeout: nil, wrapper_image: nil, strategy: nil, gcs_log_dir: nil
+                     timeout: nil, wrapper_image: nil, strategy: nil, gcs_log_dir: nil, product: nil
         @command = command
         @service = service
         @config_path = config_path
@@ -433,6 +439,7 @@ module Google
         @wrapper_image = wrapper_image
         @strategy = strategy
         @gcs_log_dir = gcs_log_dir
+        @product = product
   
         yield self if block_given?
       end
@@ -489,13 +496,28 @@ module Google
       #     or Cloud Run environments.
       #
       attr_accessor :strategy
+
+      ##
+      # @return [Symbol] The serverless product to use.
+      #     Allowed values are {APP_ENGINE} and  {CLOUD_RUN}
+      #
+      attr_accessor :product
   
       ##
       # Executes the command synchronously. Streams the logs back to standard out
       # and does not return until the command has completed or timed out.
-      #
+      
       def start
         resolve_parameters
+        case @product
+        when APP_ENGINE
+          start_app_engine
+        when CLOUD_RUN
+          start_cloud_run
+        end
+      end
+
+      def start_app_engine
         app_info = version_info @service, @version
         resolve_strategy app_info["env"]
         if @strategy == "cloud_build"
@@ -503,6 +525,11 @@ module Google
         else
           start_deployment_strategy app_info
         end
+      end
+
+      def start_cloud_run
+        app_info = version_info_cloud_run @service
+        start_build_strategy app_info
       end
   
       private
@@ -516,10 +543,13 @@ module Google
         @command = ::Shellwords.split @command.to_s unless @command.is_a? Array
         @project ||= default_project
         @service ||= service_from_config || Exec.default_service
-        @version ||= latest_version @service
         @timeout ||= Exec.default_timeout
         @timeout_seconds = parse_timeout @timeout
         @wrapper_image ||= Exec.default_wrapper_image
+        @product ||= default_product
+        if @product == APP_ENGINE
+          @version ||= latest_version @service
+        end
         self
       end
   
@@ -546,12 +576,16 @@ module Google
       end
   
       def default_project
-        result = Util::Gcloud.execute \
+        result = Exec::Gcloud.execute \
           ["config", "get-value", "project"],
           capture: true, assert: false
         result.strip!
         raise NoDefaultProject if result.empty?
         result
+      end
+
+      def default_product
+        File.file?("app.yaml") ? APP_ENGINE : CLOUD_RUN
       end
   
       def parse_timeout timeout_str
@@ -572,7 +606,7 @@ module Google
       # @return [String] Name of the most recent version.
       #
       def latest_version service
-        result = Util::Gcloud.execute \
+        result = Exec::Gcloud.execute \
           [
             "app", "versions", "list",
             "--project", @project,
@@ -602,7 +636,7 @@ module Google
       def version_info service, version
         service ||= "default"
         version ||= latest_version service
-        result = Util::Gcloud.execute \
+        result = Exec::Gcloud.execute \
           [
             "app", "versions", "describe", version,
             "--project", @project,
@@ -612,6 +646,18 @@ module Google
           capture: true, assert: false
         result.strip!
         raise NoSuchVersion.new(service, version) if result.empty?
+        ::JSON.parse result
+      end
+
+      def version_info_cloud_run service
+        service ||= "default"
+        result = Exec::Gcloud.execute \
+          [
+            "run", "services", "describe", service,
+            "--format", "json"
+          ],
+          capture: true, assert: false
+        result.strip!
         ::JSON.parse result
       end
   
@@ -706,7 +752,7 @@ module Google
   
       def deploy_temp_app app_yaml_file
         temp_version = "appengine-exec-#{@timestamp_suffix}"
-        Util::Gcloud.execute [
+        Exec::Gcloud.execute [
           "app", "deploy", app_yaml_file,
           "--project", @project,
           "--version", temp_version,
@@ -746,7 +792,7 @@ module Google
       end
   
       def delete_temp_version temp_version
-        Util::Gcloud.execute [
+        Exec::Gcloud.execute [
           "app", "versions", "delete", temp_version,
           "--project", @project,
           "--service", @service,
@@ -759,11 +805,18 @@ module Google
       # Performs exec on a GAE flexible app.
       #
       def start_build_strategy app_info
-        env_variables = app_info["envVariables"] || {}
-        beta_settings = app_info["betaSettings"] || {}
-        cloud_sql_instances = beta_settings["cloud_sql_instances"] || []
-        container = app_info["deployment"]["container"]
-        image = container ? container["image"] : image_from_build(app_info)
+        if @product == APP_ENGINE
+          env_variables = app_info["envVariables"] || {}
+          beta_settings = app_info["betaSettings"] || {}
+          cloud_sql_instances = beta_settings["cloud_sql_instances"] || []
+          container = app_info["deployment"]["container"]
+          image = container ? container["image"] : image_from_build(app_info)
+        else
+          env_variables = {}
+          metadata_annotations = app_info["spec"]["template"]["metadata"]["annotations"]
+          cloud_sql_instances = metadata_annotations["run.googleapis.com/cloudsql-instances"] || []
+          image = metadata_annotations["client.knative.dev/user-image"]
+        end
   
         describe_build_strategy
   
@@ -780,7 +833,7 @@ module Google
             "--timeout", @timeout
           ]
           execute_command.concat ["--gcs-log-dir", @gcs_log_dir] unless @gcs_log_dir.nil?
-          Util::Gcloud.execute execute_command
+          Exec::Gcloud.execute execute_command
         ensure
           file.close!
         end
@@ -797,7 +850,7 @@ module Google
         before_time = (create_time + 3600).strftime "%Y-%m-%dT%H:%M:%SZ"
         partial_uri = "gcr.io/#{@project}/appengine/#{@service}.#{@version}"
         filter = "createTime>#{after_time} createTime<#{before_time} images[]:#{partial_uri}"
-        result = Util::Gcloud.execute \
+        result = Exec::Gcloud.execute \
           [
             "builds", "list",
             "--project", @project,
@@ -812,7 +865,7 @@ module Google
       end
   
       def describe_build_strategy
-        puts "\nUsing the `cloud_build` strategy for appengine:exec"
+        puts "\nUsing the `cloud_build` strategy for serverless:exec"
         puts "(i.e. running your app image in Cloud Build)"
         puts "PROJECT: #{@project}"
         puts "SERVICE: #{@service}"

@@ -135,6 +135,8 @@ module Google
         WRAPPER_IMAGE_ENV = "GAE_EXEC_WRAPPER_IMAGE"
         ## @private
         GCS_LOG_DIR = "CLOUD_BUILD_GCS_LOG_DIR"
+        ## @private
+        PRODUCT_ENV = "PRODUCT"
     
         @defined = false
     
@@ -161,6 +163,7 @@ module Google
             ::Rake::Task.define_task "serverless:exec", [:cmd] do |_t, args|
               verify_gcloud_and_report_errors
               command = extract_command args[:cmd], ::ARGV
+              selected_product = extract_product ::ENV[PRODUCT_ENV]
               app_exec = Exec.new command,
                                   project:       ::ENV[PROJECT_ENV],
                                   service:       ::ENV[SERVICE_ENV],
@@ -169,7 +172,8 @@ module Google
                                   timeout:       ::ENV[TIMEOUT_ENV],
                                   wrapper_image: ::ENV[WRAPPER_IMAGE_ENV],
                                   strategy:      ::ENV[STRATEGY_ENV],
-                                  gcs_log_dir:   ::ENV[GCS_LOG_DIR]
+                                  gcs_log_dir:   ::ENV[GCS_LOG_DIR],
+                                  product:       selected_product
               start_and_report_errors app_exec
               exit
             end
@@ -195,6 +199,22 @@ module Google
                 exit
               end
               command
+            end
+          end
+
+          def extract_product product
+            if product
+              product = product.dup
+              product.downcase!
+              
+              case product
+              when "app_engine"
+                APP_ENGINE
+              when "cloud_run"
+                CLOUD_RUN
+              end
+            else
+              nil
             end
           end
     
@@ -272,21 +292,21 @@ module Google
           end
     
           def verify_gcloud_and_report_errors
-            Util::Gcloud.verify!
-          rescue Util::Gcloud::BinaryNotFound
+            Exec::Gcloud.verify!
+          rescue Exec::Gcloud::BinaryNotFound
             report_error <<~MESSAGE
               Could not find the `gcloud` binary in your system path.
               This tool requires the Google Cloud SDK. To download and install it,
               visit https://cloud.google.com/sdk/downloads
             MESSAGE
-          rescue Util::Gcloud::GcloudNotAuthenticated
+          rescue Exec::Gcloud::GcloudNotAuthenticated
             report_error <<~MESSAGE
               The gcloud authorization has not been completed. If you have not yet
               initialized the Google Cloud SDK, we recommend running the `gcloud init`
               command as described at https://cloud.google.com/sdk/docs/initializing
               Alternately, you may log in directly by running `gcloud auth login`.
             MESSAGE
-          rescue Util::Gcloud::ProjectNotSet
+          rescue Exec::Gcloud::ProjectNotSet
             report_error <<~MESSAGE
               The gcloud project configuration has not been set. If you have not yet
               initialized the Google Cloud SDK, we recommend running the `gcloud init`
