@@ -376,7 +376,8 @@ module Google
         #     for App Engine Flexible and Cloud Run).
         # @param gcs_log_dir [String,nil] GCS bucket name of the cloud build log
         #     when strategy is "cloud_build". (ex. "gs://BUCKET-NAME/FOLDER-NAME")
-        #
+        # @param product [Symbol] The serverless product to use. If omitted, defaults to
+        #     the value returned by {Google::Serverless::Exec.default_product}
         def new_rake_task name, args: [], env_args: [],
                           service: nil, config_path: nil, version: nil,
                           timeout: nil, project: nil, wrapper_image: nil,
@@ -499,7 +500,7 @@ module Google
 
       ##
       # @return [Symbol] The serverless product to use.
-      #     Allowed values are {APP_ENGINE} and  {CLOUD_RUN}
+      #     Allowed values are {APP_ENGINE} and {CLOUD_RUN}
       #
       attr_accessor :product
   
@@ -802,7 +803,7 @@ module Google
   
       ##
       # @private
-      # Performs exec on a GAE flexible app.
+      # Performs exec on a GAE flexible and Cloud Run apps.
       #
       def start_build_strategy app_info
         if @product == APP_ENGINE
@@ -813,6 +814,7 @@ module Google
           image = container ? container["image"] : image_from_build(app_info)
         else
           env_variables = {}
+          app_info["spec"]["template"]["spec"]["containers"][0]["env"].each { |env| env_variables[env["name"]] = env["value"] }
           metadata_annotations = app_info["spec"]["template"]["metadata"]["annotations"]
           cloud_sql_instances = metadata_annotations["run.googleapis.com/cloudsql-instances"] || []
           image = metadata_annotations["client.knative.dev/user-image"]
