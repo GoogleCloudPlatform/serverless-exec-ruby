@@ -281,8 +281,8 @@ module Google
                 GCS bucket name of the cloud build log when GAE_STRATEGY is "cloud_build".
                 (ex. "gs://BUCKET-NAME/FOLDER-NAME")
               PRODUCT
-                The serverless product to use. If not specified, autodetects which product,
-                {APP_ENGINE} or {CLOUD_RUN} to use.
+                The serverless product to use. Valid values are "app_engine" and "cloud_run".
+                If not specified, autodetects the serverless product to use.
               This rake task is provided by the "serverless" gem. To make these tasks
               available, add the following line to your Rakefile:
                   require "google/serverless/exec/tasks"
