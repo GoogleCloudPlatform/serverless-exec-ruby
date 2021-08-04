@@ -815,9 +815,7 @@ module Google
         else
           env_variables = {}
           app_env = app_info["spec"]["template"]["spec"]["containers"][0]["env"]
-          if app_env
-            app_env.each { |env| env_variables[env["name"]] = env["value"] }
-          end
+          app_env&.each { |env| env_variables[env["name"]] = env["value"] }
           metadata_annotations = app_info["spec"]["template"]["metadata"]["annotations"]
           cloud_sql_instances = metadata_annotations["run.googleapis.com/cloudsql-instances"] || []
           image = metadata_annotations["client.knative.dev/user-image"]
