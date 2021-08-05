@@ -1,6 +1,6 @@
 # Google Serverless Execution Tool
 
-This repository contains the "google-serverless-exec" gem, a collection of libraries and plugins for integrating Ruby apps with Google serverless environments. It is not required for deploying a Ruby application to Google serverless compute, but it provides a number of convenience hooks and tools for integrating into Google serverless environments.
+This repository contains the "google-serverless-exec" gem, a library for serverless execution. This may be used for safe running of ops and maintenance tasks, such as database migrations in a production serverless environment. It is not required for deploying a Ruby application to Google serverless compute, but it provides a number of convenience tools for integrating into Google serverless environments.
 
 ## Quickstart
 
@@ -17,7 +17,12 @@ And then execute:
 $ bundle install
 ```
 
-### Rack Quick Start
+### Setting up serverless:exec execution
+
+This library provides rake tasks for serverless execution, allowing
+serverless applications to perform on-demand tasks in the serverless
+environment. This may be used for safe running of ops and maintenance tasks,
+such as database migrations, that access production cloud resources. 
 
 You can add the Rake tasks to your application by adding the following to your Rakefile:
 
@@ -25,13 +30,7 @@ You can add the Rake tasks to your application by adding the following to your R
 require "google/serverless/exec/tasks"
 ```
 
-### Setting up serverless:exec execution
-
-This library provides rake tasks for serverless execution, allowing
-serverless applications to perform on-demand tasks in the serverless
-environment. This may be used for safe running of ops and maintenance tasks,
-such as database migrations, that access production cloud resources. For
-example, you could run a production database migration in a Rails app using:
+You can run a production database migration in a Rails app using:
 
     bundle exec rake serverless:exec -- bundle exec rake db:migrate
 
