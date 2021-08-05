@@ -26,7 +26,7 @@ module Google
       ##
       # # Serverless Rake Tasks.
       #
-      # To make these tasks available, add the line `require "serverless/tasks"`
+      # To make these tasks available, add the line `require "google/serverless/exec/tasks"`
       # to your Rakefile. If your app uses Ruby on Rails, then the serverless gem
       # provides a railtie that adds its tasks automatically, so you don't have
       # to do anything beyond adding the gem to your Gemfile.
