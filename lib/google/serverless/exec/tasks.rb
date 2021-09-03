@@ -35,7 +35,7 @@ module Google
       #
       # ## Rake serverless:exec
       #
-      # Executes a given command in the context of a serverless application. 
+      # Executes a given command in the context of a serverless application.
       # See {Google::Serverless::Exec} for more information on this capability.
       #
       # The command to be run may either be provided as a rake argument, or as
@@ -137,9 +137,9 @@ module Google
         GCS_LOG_DIR = "CLOUD_BUILD_GCS_LOG_DIR"
         ## @private
         PRODUCT_ENV = "PRODUCT"
-    
+
         @defined = false
-    
+
         class << self
           ##
           # @private
@@ -151,12 +151,12 @@ module Google
               return
             end
             @defined = true
-    
+
             setup_exec_task
           end
-    
+
           private
-    
+
           def setup_exec_task
             ::Rake.application.last_description =
               "Execute the given command in a Google serverless application."
@@ -178,7 +178,7 @@ module Google
               exit
             end
           end
-    
+
           def extract_command cmd, argv
             if cmd
               ::Shellwords.split cmd
@@ -203,21 +203,18 @@ module Google
           end
 
           def extract_product product
-            if product
-              product = product.dup
-              product.downcase!
-              
-              case product
-              when "app_engine"
-                APP_ENGINE
-              when "cloud_run"
-                CLOUD_RUN
-              end
-            else
-              nil
+            return unless product
+
+            product = product.dup
+            product.downcase!
+            case product
+            when "app_engine"
+              APP_ENGINE
+            when "cloud_run"
+              CLOUD_RUN
             end
           end
-    
+
           def show_usage
             puts <<~USAGE
               rake serverless:exec
@@ -293,7 +290,7 @@ module Google
               https://github.com/GoogleCloudPlatform/google-serverless-exec
             USAGE
           end
-    
+
           def verify_gcloud_and_report_errors
             Exec::Gcloud.verify!
           rescue Exec::Gcloud::BinaryNotFound
@@ -318,7 +315,7 @@ module Google
               running `gcloud config set project <project-name>`.
             MESSAGE
           end
-    
+
           def start_and_report_errors app_exec
             app_exec.start
           rescue Exec::ConfigFileNotFound => e
@@ -367,9 +364,9 @@ module Google
           rescue Exec::UsageError => e
             report_error e.message
           end
-    
+
           def report_error str
-            ::STDERR.puts str
+            warn str
             exit 1
           end
         end

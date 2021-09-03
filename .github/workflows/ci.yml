@@ -1,0 +1,52 @@
+name: CI
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+jobs:
+  CI:
+    if: ${{ github.repository == 'GoogleCloudPlatform/serverless-exec-ruby' }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            ruby: "2.4"
+            task: test
+          - os: ubuntu-latest
+            ruby: "2.5"
+            task: test
+          - os: ubuntu-latest
+            ruby: "2.6"
+            task: test
+          - os: ubuntu-latest
+            ruby: "2.7"
+            task: test
+          - os: ubuntu-latest
+            ruby: "3.0"
+            task: test
+          - os: ubuntu-latest
+            ruby: "2.7"
+            task: rubocop , build , yardoc
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v2
+    - name: Install Ruby ${{ matrix.ruby }}
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: "${{ matrix.ruby }}"
+    - name: Install NodeJS 14.x
+      uses: actions/setup-node@v2
+      with:
+        node-version: "14.x"
+    - name: Install tools
+      shell: bash
+      run: "bundle install && gem install --no-document toys"
+    - name: Test ${{ matrix.task }}
+      shell: bash
+      run: toys do ${{ matrix.task }} < /dev/null
