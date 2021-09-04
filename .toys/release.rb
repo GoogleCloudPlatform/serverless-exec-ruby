@@ -14,7 +14,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load_git remote: "https://github.com/dazuma/google-cloud-ruby.git",
-         path: ".toys/release",
-         commit: "pr/release-please",
-         update: true
+load_git remote: "https://github.com/googleapis/google-cloud-ruby.git",
+         path: ".toys/release"
