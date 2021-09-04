@@ -1,16 +1,22 @@
 inherit_gem:
   google-style: google-style.yml
 
+Metrics/AbcSize:
+  Exclude:
+    - "lib/google/serverless/exec.rb"
 Metrics/BlockLength:
   Exclude:
-    - "serverless.gemspec"
+    - "google-serverless-exec.gemspec"
 Metrics/ClassLength:
   Exclude:
     - "lib/google/serverless/exec.rb"
 Metrics/MethodLength:
   Exclude:
-    - "lib/google/serverless/exec.rb""
+    - "lib/google/serverless/exec.rb"
     - "lib/google/serverless/exec/tasks.rb"
 Metrics/ModuleLength:
   Exclude:
     - "lib/google/serverless/exec/tasks.rb"
+Metrics/PerceivedComplexity:
+  Exclude:
+    - "lib/google/serverless/exec.rb"

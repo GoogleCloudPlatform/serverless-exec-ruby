@@ -14,31 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-require "bundler/gem_tasks"
-require "rake/testtask"
-require "rdoc/task"
-
-CLEAN << ["pkg", "doc"]
-
-::Rake::TestTask.new do |t|
-  t.libs << "test"
-  t.libs << "lib"
-  t.test_files = ::FileList["test/test_*.rb"]
-end
-
-::RDoc::Task.new do |rd|
-  rd.rdoc_dir = "doc"
-  rd.main = "README.md"
-  rd.rdoc_files.include "README.md", "CONTRIBUTING.md", "CHANGELOG.md", "lib/**/*.rb"
-  rd.options << "--line-numbers"
-  rd.options << "--all"
-end
-
-require "yard"
-require "yard/rake/yardoc_task"
-YARD::Rake::YardocTask.new
-
-load "lib/google/serverless/exec/tasks.rb"
-
-task default: [:test]
+load_git remote: "https://github.com/dazuma/google-cloud-ruby.git",
+         path: ".toys/release",
+         commit: "pr/release-please",
+         update: true

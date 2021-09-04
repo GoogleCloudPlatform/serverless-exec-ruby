@@ -1,0 +1,8 @@
+/Gemfile.lock
+/doc/
+/pkg/
+/node_modules/
+/package-lock.json
+.DS_STORE
+/.bundle/
+/.yardoc/

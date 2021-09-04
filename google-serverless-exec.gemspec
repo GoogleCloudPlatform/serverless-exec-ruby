@@ -37,20 +37,17 @@ require "google/serverless/exec/version"
   spec.homepage = "https://github.com/GoogleCloudPlatform/serverless-exec-ruby"
 
   spec.files = ::Dir.glob("lib/**/*.rb") +
-               ::Dir.glob("data/**/*") +
                ::Dir.glob("*.md") +
                ["LICENSE", ".yardopts"]
-  spec.required_ruby_version = ">= 2.4.0"
+  spec.required_ruby_version = ">= 2.5.0"
   spec.require_paths = ["lib"]
 
-  spec.add_development_dependency "bundler", "~> 2.0"
   spec.add_development_dependency "google-style", "~> 1.25.1"
   spec.add_development_dependency "minitest", "~> 5.11"
   spec.add_development_dependency "minitest-focus", "~> 1.1"
   spec.add_development_dependency "minitest-rg", "~> 5.2"
-  spec.add_development_dependency "rake", "~> 12.0"
+  spec.add_development_dependency "rake", "~> 13.0"
   spec.add_development_dependency "rdoc", "~> 6.0"
   spec.add_development_dependency "redcarpet", "~> 3.4"
-  spec.add_development_dependency "toys", "~> 0.11"
   spec.add_development_dependency "yard", "~> 0.9"
 end

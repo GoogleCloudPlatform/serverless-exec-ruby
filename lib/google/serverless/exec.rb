@@ -202,7 +202,7 @@ module Google
     # used. (Note that this most recently deployed version may not be the same
     # version that is currently receiving traffic: for example, if you deployed
     # with `--no-promote`.) To use a different version, set the `version`
-    # parameter in the {Google::Serverless::Exec} constructor 
+    # parameter in the {Google::Serverless::Exec} constructor
     # (or the corresponding `GAE_VERSION` parameter in the Rake task).
     #
     # ### Providing credentials
@@ -253,13 +253,13 @@ module Google
 
       APP_ENGINE = :app_engine
       CLOUD_RUN = :cloud_run
-  
+
       ##
       # Base class for exec-related usage errors.
       #
       class UsageError < ::StandardError
       end
-  
+
       ##
       # Unsupported strategy
       #
@@ -273,7 +273,7 @@ module Google
         attr_reader :strategy
         attr_reader :app_env
       end
-  
+
       ##
       # Exception raised when a parameter is malformed.
       #
@@ -286,7 +286,7 @@ module Google
         attr_reader :param_name
         attr_reader :value
       end
-  
+
       ##
       # Exception raised when gcloud has no default project.
       #
@@ -295,7 +295,7 @@ module Google
           super "No default project set."
         end
       end
-  
+
       ##
       # Exception raised when the App Engine config file could not be found.
       #
@@ -306,7 +306,7 @@ module Google
         end
         attr_reader :config_path
       end
-  
+
       ##
       # Exception raised when the App Engine config file could not be parsed.
       #
@@ -317,7 +317,7 @@ module Google
         end
         attr_reader :config_path
       end
-  
+
       ##
       # Exception raised when the given version could not be found, or no
       # versions at all could be found for the given service.
@@ -335,20 +335,20 @@ module Google
         attr_reader :service
         attr_reader :version
       end
-  
+
       class << self
         ## @return [String] Default command timeout.
         attr_accessor :default_timeout
-  
+
         ## @return [String] Default service name if the config doesn't specify.
         attr_accessor :default_service
-  
+
         ## @return [String] Path to default config file.
         attr_accessor :default_config_path
-  
+
         ## @return [String] Docker image that implements the app engine wrapper.
         attr_accessor :default_wrapper_image
-  
+
         ##
         # Create an execution for a rake task.
         #
@@ -397,7 +397,7 @@ module Google
               strategy: strategy, gcs_log_dir: gcs_log_dir, product: product
         end
       end
-  
+
       ##
       # Create an execution for the given command.
       #
@@ -441,40 +441,40 @@ module Google
         @strategy = strategy
         @gcs_log_dir = gcs_log_dir
         @product = product
-  
+
         yield self if block_given?
       end
-  
+
       ##
       # @return [String] The project ID.
       # @return [nil] if the default gcloud project should be used.
       #
       attr_accessor :project
-  
+
       ##
       # @return [String] The service name.
       # @return [nil] if the service should be obtained from the app config.
       #
       attr_accessor :service
-  
+
       ##
       # @return [String] Path to the config file.
       # @return [nil] if the default of `./app.yaml` should be used.
       #
       attr_accessor :config_path
-  
+
       ##
       # @return [String] Service version of the image to use.
       # @return [nil] if the most recent should be used.
       #
       attr_accessor :version
-  
+
       ##
       # @return [String] The command timeout, in `1h23m45s` format.
       # @return [nil] if the default of `10m` should be used.
       #
       attr_accessor :timeout
-  
+
       ##
       # The command to run.
       #
@@ -483,13 +483,13 @@ module Google
       #     directly without a shell.
       #
       attr_accessor :command
-  
+
       ##
       # @return [String] Custom wrapper image to use.
       # @return [nil] if the default should be used.
       #
       attr_accessor :wrapper_image
-  
+
       ##
       # @return [String] The execution strategy to use. Allowed values are
       #     `"deployment"` and `"cloud_build"`.
@@ -503,11 +503,11 @@ module Google
       #     Allowed values are {APP_ENGINE} and {CLOUD_RUN}
       #
       attr_accessor :product
-  
+
       ##
       # Executes the command synchronously. Streams the logs back to standard out
       # and does not return until the command has completed or timed out.
-      
+
       def start
         resolve_parameters
         case @product
@@ -532,9 +532,9 @@ module Google
         app_info = version_info_cloud_run @service
         start_build_strategy app_info
       end
-  
+
       private
-  
+
       ##
       # @private
       # Resolves and canonicalizes all the parameters.
@@ -553,7 +553,7 @@ module Google
         end
         self
       end
-  
+
       def resolve_strategy app_env
         @strategy = @strategy.to_s.downcase
         if @strategy.empty?
@@ -565,7 +565,7 @@ module Google
         end
         @strategy
       end
-  
+
       def service_from_config
         return nil if !@config_path && @service
         @config_path ||= Exec.default_config_path
@@ -575,7 +575,7 @@ module Google
       rescue ::StandardError
         raise BadConfigFileFormat, @config_path
       end
-  
+
       def default_project
         result = Exec::Gcloud.execute \
           ["config", "get-value", "project"],
@@ -588,7 +588,7 @@ module Google
       def default_product
         File.file?("app.yaml") ? APP_ENGINE : CLOUD_RUN
       end
-  
+
       def parse_timeout timeout_str
         matched = timeout_str =~ /^(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s?)?$/
         raise BadParameter.new "timeout", timeout_str unless matched
@@ -597,7 +597,7 @@ module Google
         seconds = ::Regexp.last_match(3).to_i
         hours * 3600 + minutes * 60 + seconds
       end
-  
+
       ##
       # @private
       # Returns the name of the most recently created version of the given
@@ -621,7 +621,7 @@ module Google
         raise NoSuchVersion, service unless result
         result
       end
-  
+
       ##
       # @private
       # Returns full information on the given version of the given service.
@@ -661,7 +661,7 @@ module Google
         result.strip!
         ::JSON.parse result
       end
-  
+
       ##
       # @private
       # Performs exec on a GAE standard app.
@@ -686,7 +686,7 @@ module Google
           delete_temp_version temp_version
         end
       end
-  
+
       def describe_deployment_strategy
         puts "\nUsing the `deployment` strategy for serverless:exec"
         puts "(i.e. deploying a temporary version of your app)"
@@ -694,11 +694,11 @@ module Google
         puts "SERVICE: #{@service}"
         puts "TIMEOUT: #{@timeout}"
       end
-  
+
       def create_secret
         ::SecureRandom.alphanumeric 20
       end
-  
+
       def copy_entrypoint secret
         entrypoint_template =
           ::File.join(::File.dirname(::File.dirname(__dir__)),
@@ -714,7 +714,7 @@ module Google
         end
         entrypoint_file
       end
-  
+
       def copy_app_yaml app_info, entrypoint_file
         yaml_data = {
           "runtime"        => app_info["runtime"],
@@ -734,7 +734,7 @@ module Google
         end
         app_yaml_file
       end
-  
+
       def complete_flex_app_yaml yaml_data, app_info
         yaml_data["env"] = "flex"
         orig_path = (app_info["betaSettings"] || {})["module_yaml_path"]
@@ -746,11 +746,11 @@ module Google
           yaml_data[key] = orig_yaml[key] if orig_yaml[key]
         end
       end
-  
+
       def complete_standard_app_yaml yaml_data, app_info
         yaml_data["instance_class"] = app_info["instanceClass"].sub(/^F/, "B")
       end
-  
+
       def deploy_temp_app app_yaml_file
         temp_version = "appengine-exec-#{@timestamp_suffix}"
         Exec::Gcloud.execute [
@@ -761,7 +761,7 @@ module Google
         ]
         temp_version
       end
-  
+
       def track_status temp_version, secret
         host = "#{temp_version}.#{@service}.#{@project}.appspot.com"
         ::Net::HTTP.start host do |http|
@@ -791,7 +791,7 @@ module Google
           end
         end
       end
-  
+
       def delete_temp_version temp_version
         Exec::Gcloud.execute [
           "app", "versions", "delete", temp_version,
@@ -800,7 +800,7 @@ module Google
           "--quiet"
         ]
       end
-  
+
       ##
       # @private
       # Performs exec on a GAE flexible and Cloud Run apps.
@@ -820,9 +820,9 @@ module Google
           cloud_sql_instances = metadata_annotations["run.googleapis.com/cloudsql-instances"] || []
           image = metadata_annotations["client.knative.dev/user-image"]
         end
-  
+
         describe_build_strategy
-  
+
         config = build_config command, image, env_variables, cloud_sql_instances
         file = ::Tempfile.new ["cloudbuild_", ".json"]
         begin
@@ -841,7 +841,7 @@ module Google
           file.close!
         end
       end
-  
+
       ##
       # @private
       # Workaround for https://github.com/GoogleCloudPlatform/appengine-ruby/issues/33
@@ -866,7 +866,7 @@ module Google
         build_info = ::JSON.parse(result).first
         build_info["images"].first
       end
-  
+
       def describe_build_strategy
         puts "\nUsing the `cloud_build` strategy for serverless:exec"
         puts "(i.e. running your app image in Cloud Build)"
@@ -876,7 +876,7 @@ module Google
         puts "TIMEOUT: #{@timeout}"
         puts ""
       end
-  
+
       ##
       # @private
       # Builds a cloudbuild config as a data structure.
@@ -901,7 +901,7 @@ module Google
         end
         args << "--"
         args += command
-  
+
         {
           "steps" => [
             "name" => @wrapper_image,
