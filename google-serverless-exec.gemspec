@@ -17,22 +17,19 @@
 lib = File.expand_path "lib", __dir__
 $LOAD_PATH.unshift lib unless $LOAD_PATH.include? lib
 require "google/serverless/exec/version"
+version = ::Google::Serverless::Exec::VERSION
 
 ::Gem::Specification.new do |spec|
   spec.name = "google-serverless-exec"
-  spec.version = ::Google::Serverless::Exec::VERSION
+  spec.version = version
   spec.authors = ["Daniel Azuma", "Tram Bui"]
   spec.email = ["dazuma@gmail.com", "trambui09098@gmail.com"]
 
-  spec.summary = "Google Cloud integration tools"
+  spec.summary = "Execute production tasks for Google Serverless apps"
   spec.description =
-    " The google-serverless-exec gem is a set of classes, plugins, and tools for" \
-    " integration with Google Serverless compute. It provides access to the" \
-    " runtime environments, including logging to the Google Cloud" \
-    " Console and interrogation of hosting properties. It also provides Rake" \
-    " tasks for managing your serverless applications, for example to run" \
-    " production maintenance commands such as database migrations. This gem" \
-    " is NOT required to deploy your Ruby application to Google Serverless compute."
+    "The google-serverless-exec gem provides a way to safely run production" \
+    " maintenance tasks, such as database migrations, for your serverless" \
+    " applications deployed to Google App Engine or Google Cloud Run."
   spec.license = "Apache-2.0"
   spec.homepage = "https://github.com/GoogleCloudPlatform/serverless-exec-ruby"
 
@@ -50,4 +47,11 @@ require "google/serverless/exec/version"
   spec.add_development_dependency "rdoc", "~> 6.0"
   spec.add_development_dependency "redcarpet", "~> 3.4"
   spec.add_development_dependency "yard", "~> 0.9"
+
+  if spec.respond_to? :metadata
+    spec.metadata["changelog_uri"] = "https://www.rubydoc.info/gems/google-serverless-exec/#{version}/file/CHANGELOG.md"
+    spec.metadata["source_code_uri"] = "https://github.com/GoogleCloudPlatform/serverless-exec-ruby"
+    spec.metadata["bug_tracker_uri"] = "https://github.com/GoogleCloudPlatform/serverless-exec-ruby/issues"
+    spec.metadata["documentation_uri"] = "https://www.rubydoc.info/gems/google-serverless-exec/#{version}"
+  end
 end
