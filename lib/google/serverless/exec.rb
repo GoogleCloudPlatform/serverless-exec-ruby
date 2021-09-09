@@ -427,10 +427,20 @@ module Google
       # @param product [Symbol] The serverless product. If omitted, defaults to the
       #     value returns by {Google::Serverless::Exec#default_product}.
       #     Allowed values are {APP_ENGINE} and {CLOUD_RUN}.
+      # @param region [String] The region for the cloud run service. Required
+      #     if the product is cloud run.
       #
       def initialize command,
-                     project: nil, service: nil, config_path: nil, version: nil,
-                     timeout: nil, wrapper_image: nil, strategy: nil, gcs_log_dir: nil, product: nil
+                     project: nil,
+                     service: nil,
+                     config_path: nil,
+                     version: nil,
+                     timeout: nil,
+                     wrapper_image: nil,
+                     strategy: nil,
+                     gcs_log_dir: nil,
+                     product: nil,
+                     region: nil
         @command = command
         @service = service
         @config_path = config_path
@@ -441,6 +451,7 @@ module Google
         @strategy = strategy
         @gcs_log_dir = gcs_log_dir
         @product = product
+        @region = region
 
         yield self if block_given?
       end
@@ -503,6 +514,11 @@ module Google
       #     Allowed values are {APP_ENGINE} and {CLOUD_RUN}
       #
       attr_accessor :product
+
+      ##
+      # @return [String] The region for the cloud run service
+      #
+      attr_accessor :region
 
       ##
       # Executes the command synchronously. Streams the logs back to standard out
@@ -652,12 +668,15 @@ module Google
 
       def version_info_cloud_run service
         service ||= "default"
+        raise BadParameter.new("region", "(value missing)") unless region
         result = Exec::Gcloud.execute \
           [
             "run", "services", "describe", service,
+            "--project", @project,
+            "--region", region,
             "--format", "json"
           ],
-          capture: true, assert: false
+          capture: true, assert: false, echo: true
         result.strip!
         ::JSON.parse result
       end
