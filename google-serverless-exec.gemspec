@@ -34,6 +34,7 @@ version = ::Google::Serverless::Exec::VERSION
   spec.homepage = "https://github.com/GoogleCloudPlatform/serverless-exec-ruby"
 
   spec.files = ::Dir.glob("lib/**/*.rb") +
+               ::Dir.glob("data/**/*") +
                ::Dir.glob("*.md") +
                ["LICENSE", ".yardopts"]
   spec.required_ruby_version = ">= 2.5.0"
