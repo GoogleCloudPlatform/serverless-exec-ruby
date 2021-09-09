@@ -700,9 +700,8 @@ module Google
       end
 
       def copy_entrypoint secret
-        entrypoint_template =
-          ::File.join(::File.dirname(::File.dirname(__dir__)),
-                      "data", "exec_standard_entrypoint.rb.erb")
+        base_dir = ::File.dirname ::File.dirname ::File.dirname __dir__
+        entrypoint_template = ::File.join base_dir, "data", "exec_standard_entrypoint.rb.erb"
         entrypoint_file = "appengine_exec_entrypoint_#{@timestamp_suffix}.rb"
         erb = ::ERB.new ::File.read entrypoint_template
         data = {
