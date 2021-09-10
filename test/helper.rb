@@ -3,3 +3,5 @@
 require "minitest/autorun"
 require "minitest/focus"
 require "minitest/rg"
+
+require "google-serverless-exec"

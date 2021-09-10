@@ -20,3 +20,6 @@ Metrics/ModuleLength:
 Metrics/PerceivedComplexity:
   Exclude:
     - "lib/google/serverless/exec.rb"
+Naming/FileName:
+  Exclude:
+    - "lib/google-serverless-exec.rb"
