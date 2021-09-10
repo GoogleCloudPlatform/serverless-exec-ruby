@@ -24,25 +24,28 @@ module Google
   module Serverless
     class Exec
       ##
-      # # Serverless Rake Tasks.
+      # # Rake Task for serverless exec
       #
-      # To make these tasks available, add the line `require "google/serverless/exec/tasks"`
-      # to your Rakefile. If your app uses Ruby on Rails, then the serverless gem
-      # provides a railtie that adds its tasks automatically, so you don't have
-      # to do anything beyond adding the gem to your Gemfile.
+      # This module implements the `serverless:exec` rake task. To make it
+      # available, add the line
       #
-      # The following tasks are defined:
+      #     require "google/serverless/exec/tasks"
       #
-      # ## Rake serverless:exec
+      # to your Rakefile. If your app uses Ruby on Rails, then the gem provides
+      # a railtie that adds this task automatically, so you don't have to do
+      # anything beyond adding the gem to your Gemfile.
       #
-      # Executes a given command in the context of a serverless application.
-      # See {Google::Serverless::Exec} for more information on this capability.
+      # ## Usage
+      #
+      # The `serverless:exec` a given command in the context of a serverless
+      # application. See {Google::Serverless::Exec} for more information on
+      # this capability.
       #
       # The command to be run may either be provided as a rake argument, or as
       # command line arguments, delimited by two dashes `--`. (The dashes are
       # needed to separate your command from rake arguments and flags.)
-      # For example, to run a production database migration, you can run either of
-      # the following equivalent commands:
+      # For example, to run a production database migration, you can run either
+      # of the following equivalent commands:
       #
       #     bundle exec rake "serverless:exec[bundle exec bin/rails db:migrate]"
       #     bundle exec rake serverless:exec -- bundle exec bin/rails db:migrate
@@ -51,94 +54,111 @@ module Google
       #
       #     bundle exec rake serverless:exec --
       #
-      # ### Parameters
+      # ## Parameters
       #
       # You may customize the behavior of the serverless execution through a few
-      # enviroment variable parameters. These are set via the normal mechanism at
-      # the end of a rake command line. For example, to set GAE_CONFIG:
+      # enviroment variable parameters. These are set via the normal mechanism
+      # at the end of a rake command line. For example, to set EXEC_APP_CONFIG:
       #
-      #     bundle exec rake serverless:exec GAE_CONFIG=myservice.yaml -- bundle exec bin/rails db:migrate
+      #     bundle exec rake serverless:exec EXEC_APP_CONFIG=myservice.yaml -- bundle exec bin/rails db:migrate
       #
       # Be sure to set these parameters before the double dash. Any arguments
       # following the double dash are interpreted as part of the command itself.
       #
       # The following environment variable parameters are supported:
       #
-      # #### GAE_TIMEOUT
-      #
-      # Amount of time to wait before serverless:exec terminates the command.
-      # Expressed as a string formatted like: "2h15m10s". Default is "10m".
-      #
-      # #### GAE_PROJECT
+      # ### EXEC_PROJECT
       #
       # The ID of your Google Cloud project. If not specified, uses the current
       # project from gcloud.
       #
-      # #### GAE_CONFIG
+      # ### EXEC_PRODUCT
+      #
+      # The product used to deploy the app. Valid values are `app_engine` or
+      # `cloud_run`. If omitted, the task will try to guess based on whether
+      # an App Engine config file (e.g. `app.yaml`) is present.
+      #
+      # ### EXEC_REGION
+      #
+      # The Google Cloud region to which the app is deployed. Required for
+      # Cloud Run apps.
+      #
+      # ### EXEC_STRATEGY
+      #
+      # The execution strategy to use. Valid values are `deployment` (which is
+      # the default for App Engine Standard apps) and `cloud_build` (which is
+      # the default for App Engine Flexible and Cloud Run apps).
+      #
+      # Normally you should leave the strategy set to the default. The main
+      # reason to change it is if your app runs on the Flexible Environment and
+      # talks to a database over a VPC (using a private IP address). The
+      # `cloud_build` strategy used by default for Flexible apps cannot connect
+      # to a VPC, so you should use `deployment` in this case. (But note that,
+      # otherwise, the `deployment` strategy is significantly slower for apps
+      # on the App Engine Flexible Environment.)
+      #
+      # ### EXEC_TIMEOUT
+      #
+      # Amount of time to wait before serverless:exec terminates the command.
+      # Expressed as a string formatted like: `2h15m10s`. Default is `10m`.
+      #
+      # ### EXEC_SERVICE_NAME
+      #
+      # Name of the service to be used. If your app uses Cloud Run, this is
+      # required. If your app uses App Engine, normally the service name is
+      # obtained from the config file, but you can override it using this
+      # parameter.
+      #
+      # ### EXEC_APP_CONFIG
       #
       # Path to the App Engine config file, used when your app has multiple
       # services, or the config file is otherwise not called `./app.yaml`. The
       # config file is used to determine the name of the App Engine service.
+      # Unused for Cloud Run apps.
       #
-      # #### GAE_SERVICE
+      # ### EXEC_APP_VERSION
       #
-      # Name of the service to be used. Overrides any service name specified in
-      # your config file.
+      # The version of the App Engine service, used to identify which
+      # application image to use to run your command. If not specified, uses
+      # the most recently created version, regardless of whether that version
+      # is actually serving traffic. Applies only to the `cloud_build` strategy
+      # for App Engine apps; ignored for the `deployment` strategy or if your
+      # app uses Cloud Run.
       #
-      # #### GAE_EXEC_STRATEGY
+      # ### EXEC_BUILD_LOGS_DIR
       #
-      # The execution strategy to use. Valid values are "deployment" (which is the
-      # default for App Engine Standard apps) and "cloud_build" (which is the
-      # default for App Engine Flexible and Cloud Run apps).
+      # GCS bucket name of the cloud build log when GAE_STRATEGY is
+      # `cloud_build`. (ex. `gs://BUCKET-NAME/FOLDER-NAME`)
       #
-      # Normally you should leave the strategy set to the default. The main reason
-      # to change it is if your app runs on the Flexible Environment and talks to
-      # a database over a VPC (using a private IP address). The "cloud_build"
-      # strategy used by default for Flexible apps cannot connect to a VPC, so you
-      # should use "deployment" in this case. (But note that, otherwise, the
-      # "deployment" strategy is significantly slower for apps on the Flexible
-      # environment.)
-      #
-      # #### GAE_VERSION
-      #
-      # The version of the service, used to identify which application image to
-      # use to run your command. If not specified, uses the most recently created
-      # version, regardless of whether that version is actually serving traffic.
-      # Applies only to the "cloud_build" strategy. (The "deployment" strategy
-      # deploys its own temporary version of your app.)
-      #
-      # #### GAE_EXEC_WRAPPER_IMAGE
+      # ### EXEC_WRAPPER_IMAGE
       #
       # The fully-qualified name of the wrapper image to use. (This is a Docker
-      # image that emulates the App Engine environment in Google Cloud Build for
-      # the "cloud_build" strategy, and applies only to that strategy.) Normally,
-      # you should not override this unless you are testing a new wrapper.
+      # image that emulates the App Engine environment in Google Cloud Build
+      # for the `cloud_build` strategy, and applies only to that strategy.)
+      # Normally, you should not override this unless you are testing a new
+      # wrapper.
       #
-      # #### CLOUD_BUILD_GCS_LOG_DIR
-      #
-      # GCS bucket name of the cloud build log when GAE_STRATEGY is "cloud_build".
-      # (ex. "gs://BUCKET-NAME/FOLDER-NAME")
       module Tasks
         ## @private
-        PROJECT_ENV = "GAE_PROJECT"
+        PROJECT_ENV = "EXEC_PROJECT"
         ## @private
-        STRATEGY_ENV = "GAE_EXEC_STRATEGY"
+        STRATEGY_ENV = "EXEC_STRATEGY"
         ## @private
-        CONFIG_ENV = "GAE_CONFIG"
+        CONFIG_ENV = "EXEC_APP_CONFIG"
         ## @private
-        SERVICE_ENV = "GAE_SERVICE"
+        SERVICE_ENV = "EXEC_SERVICE_NAME"
         ## @private
-        VERSION_ENV = "GAE_VERSION"
+        VERSION_ENV = "EXEC_APP_VERSION"
         ## @private
-        TIMEOUT_ENV = "GAE_TIMEOUT"
+        TIMEOUT_ENV = "EXEC_TIMEOUT"
         ## @private
-        WRAPPER_IMAGE_ENV = "GAE_EXEC_WRAPPER_IMAGE"
+        WRAPPER_IMAGE_ENV = "EXEC_WRAPPER_IMAGE"
         ## @private
-        GCS_LOG_DIR = "CLOUD_BUILD_GCS_LOG_DIR"
+        LOGS_DIR_ENV = "EXEC_BUILD_LOGS_DIR"
         ## @private
-        PRODUCT_ENV = "PRODUCT"
+        PRODUCT_ENV = "EXEC_PRODUCT"
         ## @private
-        REGION_ENV = "SERVERLESS_REGION"
+        REGION_ENV = "EXEC_REGION"
 
         @defined = false
 
@@ -163,8 +183,8 @@ module Google
             ::Rake.application.last_description =
               "Execute the given command in a Google serverless application."
             ::Rake::Task.define_task "serverless:exec", [:cmd] do |_t, args|
-              verify_gcloud_and_report_errors
               command = extract_command args[:cmd], ::ARGV
+              verify_gcloud_and_report_errors
               selected_product = extract_product ::ENV[PRODUCT_ENV]
               app_exec = Exec.new command,
                                   project:       ::ENV[PROJECT_ENV],
@@ -174,7 +194,7 @@ module Google
                                   timeout:       ::ENV[TIMEOUT_ENV],
                                   wrapper_image: ::ENV[WRAPPER_IMAGE_ENV],
                                   strategy:      ::ENV[STRATEGY_ENV],
-                                  gcs_log_dir:   ::ENV[GCS_LOG_DIR],
+                                  gcs_log_dir:   ::ENV[LOGS_DIR_ENV],
                                   region:        ::ENV[REGION_ENV],
                                   product:       selected_product
               start_and_report_errors app_exec
@@ -224,9 +244,9 @@ module Google
               This Rake task executes a given command in the context of a serverless
               application. For more information,
               on this capability, see the Google::Serverless::Exec documentation at
-              http://www.rubydoc.info/gems/appengine/AppEngine/Exec
+              http://www.rubydoc.info/gems/google-serverless-exec/Google/Serverless/Exec
               The command to be run may either be provided as a rake argument, or as
-              command line arguments delimited by two dashes `--`. (The dashes are
+              command line arguments delimited by two dashes "--". (The dashes are
               needed to separate your command from rake arguments and flags.)
               For example, to run a production database migration, you can run either
               of the following equivalent commands:
@@ -237,25 +257,23 @@ module Google
               You may customize the behavior of the serverless execution through a few
               enviroment variable parameters. These are set via the normal mechanism at
               the end of a rake command line but before the double dash. For example, to
-              set GAE_CONFIG:
-                  bundle exec rake serverless:exec GAE_CONFIG=myservice.yaml -- bundle exec bin/rails db:migrate
+              set EXEC_APP_CONFIG:
+                  bundle exec rake serverless:exec EXEC_APP_CONFIG=myservice.yaml -- \\
+                    bundle exec bin/rails db:migrate
               Be sure to set these parameters before the double dash. Any arguments
               following the double dash are interpreted as part of the command itself.
               The following environment variable parameters are supported:
-              GAE_TIMEOUT
-                Amount of time to wait before serverless:exec terminates the command.
-                Expressed as a string formatted like: "2h15m10s". Default is "10m".
-              GAE_PROJECT
+              EXEC_PROJECT
                 The ID of your Google Cloud project. If not specified, uses the current
                 project from gcloud.
-              GAE_CONFIG
-                Path to the App Engine config file, used when your app has multiple
-                services, or the config file is otherwise not called `./app.yaml`. The
-                config file is used to determine the name of the App Engine service.
-              GAE_SERVICE
-                Name of the service to be used. Overrides any service name specified in
-                your config file.
-              GAE_EXEC_STRATEGY
+              EXEC_PRODUCT
+                The product used to deploy the app. Valid values are "app_engine" or
+                "cloud_run". If omitted, the task will try to guess based on whether
+                an App Engine config file (e.g. app.yaml) is present.
+              EXEC_REGION
+                The Google Cloud region to which the app is deployed. Required for
+                Cloud Run apps.
+              EXEC_STRATEGY
                 The execution strategy to use. Valid values are "deployment" (which is the
                 default for App Engine Standard apps) and "cloud_build" (which is the
                 default for App Engine Flexible and Cloud Run apps).
@@ -266,31 +284,34 @@ module Google
                 should use "deployment" in this case. (But note that, otherwise, the
                 "deployment" strategy is significantly slower for apps on the Flexible
                 environment.)
-              GAE_VERSION
-                The version of the service, used to identify which application image to
-                use to run your command. If not specified, uses the most recently created
-                version, regardless of whether that version is actually serving traffic.
-                Applies only to the "cloud_build" strategy. (The "deployment" strategy
-                deploys its own temporary version of your app.)
-              GAE_EXEC_WRAPPER_IMAGE
+              EXEC_TIMEOUT
+                Amount of time to wait before serverless:exec terminates the command.
+                Expressed as a string formatted like: "2h15m10s". Default is "10m".
+              EXEC_SERVICE_NAME
+                Name of the service to be used. If your app uses Cloud Run, this is
+                required. If your app uses App Engine, normally the service name is
+                obtained from the config file, but you can override it using this
+                parameter.
+              EXEC_APP_CONFIG
+                Path to the App Engine config file, used when your app has multiple
+                services, or the config file is otherwise not called "./app.yaml". The
+                config file is used to determine the name of the App Engine service.
+                Unused for Cloud Run apps.
+              EXEC_APP_VERSION
+                The version of the App Engine service, used to identify which
+                application image to use to run your command. If not specified, uses
+                the most recently created version, regardless of whether that version
+                is actually serving traffic. Applies only to the "cloud_build" strategy
+                for App Engine apps; ignored for the "deployment" strategy or if your
+                app uses Cloud Run.
+              EXEC_BUILD_LOGS_DIR
+                GCS bucket name of the cloud build log when GAE_STRATEGY is "cloud_build".
+                (ex. "gs://BUCKET-NAME/FOLDER-NAME")
+              EXEC_WRAPPER_IMAGE
                 The fully-qualified name of the wrapper image to use. (This is a Docker
                 image that emulates the App Engine environment in Google Cloud Build for
                 the "cloud_build" strategy, and applies only to that strategy.) Normally,
                 you should not override this unless you are testing a new wrapper.
-              CLOUD_BUILD_GCS_LOG_DIR
-                GCS bucket name of the cloud build log when GAE_STRATEGY is "cloud_build".
-                (ex. "gs://BUCKET-NAME/FOLDER-NAME")
-              PRODUCT
-                The serverless product to use. Valid values are "app_engine" and "cloud_run".
-                If not specified, autodetects the serverless product to use.
-              This rake task is provided by the "serverless" gem. To make these tasks
-              available, add the following line to your Rakefile:
-                  require "google/serverless/exec/tasks"
-              If your app uses Ruby on Rails, the gem provides a railtie that adds its
-              tasks automatically, so you don't have to do anything beyond adding the
-              gem to your Gemfile.
-              For more information or to report issues, visit the Github page:
-              https://github.com/GoogleCloudPlatform/google-serverless-exec
             USAGE
           end
 
@@ -325,35 +346,35 @@ module Google
             report_error <<~MESSAGE
               Could not determine which service should run this command because the App
               Engine config file "#{e.config_path}" was not found.
-              Specify the config file using the GAE_CONFIG argument. e.g.
-                bundle exec rake serverless:exec GAE_CONFIG=myapp.yaml -- myscript.sh
-              Alternately, you may specify a service name directly with GAE_SERVICE. e.g.
-                bundle exec rake serverless:exec GAE_SERVICE=myservice -- myscript.sh
+              Specify the config file using the EXEC_APP_CONFIG argument. e.g.
+                bundle exec rake serverless:exec EXEC_APP_CONFIG=myapp.yaml -- myscript.sh
+              Alternately, specify a service name directly with EXEC_SERVICE_NAME. e.g.
+                bundle exec rake serverless:exec EXEC_SERVICE_NAME=myservice -- myscript.sh
             MESSAGE
           rescue Exec::BadConfigFileFormat => e
             report_error <<~MESSAGE
               Could not determine which service should run this command because the App
               Engine config file "#{e.config_path}" was malformed.
               It must be a valid YAML file.
-              Specify the config file using the GAE_CONFIG argument. e.g.
-                bundle exec rake serverless:exec GAE_CONFIG=myapp.yaml -- myscript.sh
-              Alternately, you may specify a service name directly with GAE_SERVICE. e.g.
-                bundle exec rake serverless:exec GAE_SERVICE=myservice -- myscript.sh
+              Specify the config file using the EXEC_APP_CONFIG argument. e.g.
+                bundle exec rake serverless:exec EXEC_APP_CONFIG=myapp.yaml -- myscript.sh
+              Alternately, specify a service name directly with EXEC_SERVICE_NAME. e.g.
+                bundle exec rake serverless:exec EXEC_SERVICE_NAME=myservice -- myscript.sh
             MESSAGE
           rescue Exec::NoSuchVersion => e
             if e.version
               report_error <<~MESSAGE
                 Could not find version "#{e.version}" of service "#{e.service}".
                 Please double-check the version exists. To use the most recent version by
-                default, omit the GAE_VERSION argument.
+                default, omit the EXEC_APP_VERSION argument.
               MESSAGE
             else
               report_error <<~MESSAGE
                 Could not find any versions of service "#{e.service}".
                 Please double-check that you have deployed this service. If you want to run
-                a command against a different service, you may provide a GAE_CONFIG argument
-                pointing to your App Engine config file, or a GAE_SERVICE argument to specify
-                a service directly.
+                a command against a different service, you may provide a EXEC_APP_CONFIG
+                argument pointing to your App Engine config file, or a EXEC_SERVICE_NAME
+                argument to specify a service directly.
               MESSAGE
             end
           rescue Exec::NoDefaultProject
@@ -361,8 +382,8 @@ module Google
               Could not get the default project from gcloud.
               Please either set the current project using
                 gcloud config set project my-project-id
-              or specify the project by setting the GAE_PROJECT argument. e.g.
-                bundle exec rake serverless:exec GAE_PROJECT=my-project-id -- myscript.sh
+              or specify the project by setting the EXEC_PROJECT argument. e.g.
+                bundle exec rake serverless:exec EXEC_PROJECT=my-project-id -- myscript.sh
             MESSAGE
           rescue Exec::UsageError => e
             report_error e.message
