@@ -17,7 +17,7 @@ expand :clean, paths: :gitignore
 expand :minitest do |t|
   t.libs = ["lib", "test"]
   t.use_bundler
-  t.files = "test/**/*_test.rb"
+  t.files = "test/**/test_*.rb"
 end
 
 expand :minitest do |t|

@@ -1,0 +1,4 @@
+base_path = File.dirname File.dirname __dir__
+lib = File.expand_path "lib", base_path
+$LOAD_PATH.unshift lib unless $LOAD_PATH.include? lib
+require "google/serverless/exec/tasks"
