@@ -137,6 +137,8 @@ module Google
         GCS_LOG_DIR = "CLOUD_BUILD_GCS_LOG_DIR"
         ## @private
         PRODUCT_ENV = "PRODUCT"
+        ## @private
+        REGION_ENV = "SERVERLESS_REGION"
 
         @defined = false
 
@@ -173,6 +175,7 @@ module Google
                                   wrapper_image: ::ENV[WRAPPER_IMAGE_ENV],
                                   strategy:      ::ENV[STRATEGY_ENV],
                                   gcs_log_dir:   ::ENV[GCS_LOG_DIR],
+                                  region:        ::ENV[REGION_ENV],
                                   product:       selected_product
               start_and_report_errors app_exec
               exit

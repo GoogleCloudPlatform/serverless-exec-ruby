@@ -20,6 +20,13 @@ expand :minitest do |t|
   t.files = "test/**/*_test.rb"
 end
 
+expand :minitest do |t|
+  t.name = "integration"
+  t.libs = ["lib", "integration"]
+  t.use_bundler
+  t.files = "integration/**/test_*.rb"
+end
+
 expand :rubocop, bundler: true
 
 expand :yardoc do |t|

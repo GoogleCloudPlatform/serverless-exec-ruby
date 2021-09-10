@@ -1,0 +1,4 @@
+runtime: ruby
+env: flex
+entrypoint: bundle exec ruby app.rb
+service: serverless-exec-flexible
