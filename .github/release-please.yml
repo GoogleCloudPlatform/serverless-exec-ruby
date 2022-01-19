@@ -3,3 +3,4 @@ releaseType: ruby
 bumpMinorPreMajor: true
 packageName: google-serverless-exec
 monorepoTags: true
+handleGHRelease: true
