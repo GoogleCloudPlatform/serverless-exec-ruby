@@ -1,6 +1,11 @@
-FROM ruby:3.0
+FROM ruby:3.3
 
 WORKDIR /app
+
+RUN apt-get -y update && \
+    apt-get -y upgrade && \
+    apt-get -y autoremove && \
+    apt-get -y autoclean
 
 ENV RACK_ENV=production
 
