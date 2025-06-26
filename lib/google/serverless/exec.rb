@@ -737,7 +737,7 @@ module Google
         yaml_data = {
           "runtime"        => app_info["runtime"],
           "service"        => @service,
-          "entrypoint"     => "ruby #{entrypoint_file}",
+          "entrypoint"     => "bundle exec ruby #{entrypoint_file}",
           "env_variables"  => app_info["envVariables"],
           "manual_scaling" => { "instances" => 1 }
         }
