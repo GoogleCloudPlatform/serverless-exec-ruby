@@ -44,7 +44,8 @@ jobs:
         node-version: "16.x"
     - name: Install tools
       shell: bash
-      run: "bundle install && gem install --no-document toys"
+      # 0.15.6 is the last toys release that supports Ruby 2.6. The release image uses it too.
+      run: "bundle install && gem install --no-document toys -v 0.15.6"
     - name: Test ${{ matrix.task }}
       shell: bash
       run: toys do ${{ matrix.task }} < /dev/null
