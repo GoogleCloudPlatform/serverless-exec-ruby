@@ -47,3 +47,4 @@ Contributions are welcome. Please see the contributing guide at
 https://github.com/GoogleCloudPlatform/serverless-exec-ruby/blob/main/CONTRIBUTING.md
 
 Report issues at https://github.com/GoogleCloudPlatform/serverless-exec-ruby/issues
+
