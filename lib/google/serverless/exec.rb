@@ -828,7 +828,7 @@ module Google
           env_variables = app_info["envVariables"] || {}
           beta_settings = app_info["betaSettings"] || {}
           cloud_sql_instances = beta_settings["cloud_sql_instances"] || []
-          container = app_info["deployment"]["container"]
+          container = app_info.dig("deployment", "container")
           image = container ? container["image"] : image_from_build(app_info)
         else
           env_variables = {}
