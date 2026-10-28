@@ -1,5 +1,11 @@
 # Changelog
 
+### 0.2.1 (2026-10-28)
+
+#### Documentation
+
+* trigger a release to verify the new publishing pipeline ([#63](https://github.com/GoogleCloudPlatform/serverless-exec-ruby/issues/63)) 
+
 ## 0.2.0 (2021-09-13)
 
 ### Features
